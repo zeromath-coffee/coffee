@@ -4,10 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COFFEE & Fruit cheong - 음료 주문 게시판</title>
 
 ```
-<title>COFFEE &amp; Fruit cheong - 음료 주문 게시판</title>
-
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Playfair+Display:wght@600;700&display=swap');
 
@@ -219,6 +218,11 @@
         background: #60412f;
     }
 
+    .order-button:disabled {
+        opacity: 0.65;
+        cursor: wait;
+    }
+
     .order-list {
         border-top: 1px solid #e8ddd3;
     }
@@ -282,6 +286,17 @@
         font-size: 14px;
     }
 
+    .error {
+        display: none;
+        background: #fff0ed;
+        color: #a34d3d;
+        border-radius: 10px;
+        padding: 13px;
+        margin-bottom: 18px;
+        text-align: center;
+        font-size: 14px;
+    }
+
     footer {
         text-align: center;
         color: #a28e80;
@@ -290,7 +305,6 @@
         line-height: 1.7;
     }
 
-    /* 주문 확인 팝업 */
     .modal {
         display: none;
         position: fixed;
@@ -405,6 +419,11 @@
         background: #60412f;
     }
 
+    .confirm-button:disabled {
+        opacity: 0.65;
+        cursor: wait;
+    }
+
     @media (max-width: 600px) {
         .wrapper {
             padding: 15px 12px 40px;
@@ -447,17 +466,17 @@
 ```
 <header class="header">
     <div class="logo">
-        COFFEE &amp; Fruit cheong
+        COFFEE & Fruit cheong
     </div>
 
     <div class="subtitle">
-        DAILY COFFEE &amp; DRINK
+        DAILY COFFEE & DRINK
     </div>
 
     <div class="header-line"></div>
 
     <div class="notice">
-        마실 음료를 선택해주세요.<br>
+        오늘 마실 음료를 선택해주세요 ☕<br>
         주문자 이름을 남겨주시면 주문이 접수됩니다.
     </div>
 </header>
@@ -465,7 +484,7 @@
 <section class="section">
 
     <div class="section-title">
-        <h2>메뉴</h2>
+        <h2>☕ 오늘의 메뉴</h2>
         <span>원하는 음료를 선택하세요</span>
     </div>
 
@@ -526,6 +545,8 @@
         주문이 접수되었습니다. 맛있게 드세요! ☕
     </div>
 
+    <div id="error" class="error"></div>
+
     <div class="form-group">
         <label for="name">
             주문자 이름
@@ -535,6 +556,7 @@
             type="text"
             id="name"
             placeholder="이름을 입력해주세요"
+            maxlength="30"
         >
     </div>
 
@@ -603,14 +625,12 @@
 </section>
 
 <footer>
-    COFFEE &amp; Fruit cheong<br>
+    COFFEE & Fruit cheong<br>
     좋은 하루, 좋은 커피 ☕
 </footer>
 ```
 
 </div>
-
-<!-- 주문 확인 팝업 -->
 
 <div
     id="orderModal"
@@ -679,6 +699,15 @@
 </div>
 
 <script>
+    /*
+     * Google Apps Script 웹 앱 배포 URL을 입력하세요.
+     *
+     * 예:
+     * const GOOGLE_SCRIPT_URL =
+     *     "https://docs.google.com/spreadsheets/d/1pf0nPtf73S9bKCsxlBwYzWI3ALgpRyV_RDeKbwCW6cI/edit?gid=0#gid=0";
+     */
+    const GOOGLE_SCRIPT_URL = "https://docs.google.com/spreadsheets/d/1pf0nPtf73S9bKCsxlBwYzWI3ALgpRyV_RDeKbwCW6cI/edit?gid=0#gid=0";
+
     let selectedDrink = "";
     let selectedPrice = 0;
     let quantity = 1;
@@ -716,14 +745,16 @@
     function submitOrder() {
         const name = document.getElementById("name").value.trim();
 
+        hideMessage();
+
         if (name === "") {
-            alert("주문자 이름을 입력해주세요.");
+            showError("주문자 이름을 입력해주세요.");
             document.getElementById("name").focus();
             return;
         }
 
         if (selectedDrink === "") {
-            alert("음료를 선택해주세요.");
+            showError("음료를 선택해주세요.");
             return;
         }
 
@@ -775,10 +806,29 @@
         }
     }
 
-    function confirmOrder() {
+    async function confirmOrder() {
         if (!pendingOrder) {
             return;
         }
+
+        if (
+            !GOOGLE_SCRIPT_URL ||
+            GOOGLE_SCRIPT_URL.includes("https://docs.google.com/spreadsheets/d/1pf0nPtf73S9bKCsxlBwYzWI3ALgpRyV_RDeKbwCW6cI/edit?gid=0#gid=0")
+        ) {
+            showError("https://docs.google.com/spreadsheets/d/1pf0nPtf73S9bKCsxlBwYzWI3ALgpRyV_RDeKbwCW6cI/edit?gid=0#gid=0");
+            closeModal();
+            return;
+        }
+
+        const confirmButton =
+            document.querySelector(".confirm-button");
+
+        const orderButton =
+            document.querySelector(".order-button");
+
+        confirmButton.disabled = true;
+        orderButton.disabled = true;
+        confirmButton.textContent = "저장 중...";
 
         const order = {
             name: pendingOrder.name,
@@ -786,28 +836,40 @@
             quantity: pendingOrder.quantity,
             price: pendingOrder.price,
             total: pendingOrder.total,
-            time: new Date().toLocaleTimeString("ko-KR", {
-                hour: "2-digit",
-                minute: "2-digit"
-            })
+            time: new Date().toLocaleString("ko-KR")
         };
 
-        orders.push(order);
-        renderOrders();
-        closeModal();
+        try {
+            /*
+             * Google Apps Script의 doPost로 주문 데이터를 전송합니다.
+             * no-cors 환경에서는 응답 내용을 읽을 수 없으므로,
+             * 요청이 전송된 뒤 성공으로 처리합니다.
+             */
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: {
+                    "Content-Type": "text/plain;charset=utf-8"
+                },
+                body: JSON.stringify(order)
+            });
 
-        const success = document.getElementById("success");
+            orders.push(order);
+            renderOrders();
+            closeModal();
 
-        success.textContent =
-            "주문이 접수되었습니다. 맛있게 드세요! ☕";
+            showSuccess("주문이 접수되었습니다. 맛있게 드세요! ☕");
 
-        success.style.display = "block";
-
-        setTimeout(function() {
-            success.style.display = "none";
-        }, 3000);
-
-        resetForm();
+            resetForm();
+        } catch (error) {
+            console.error(error);
+            showError("주문 저장 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.");
+            closeModal();
+        } finally {
+            confirmButton.disabled = false;
+            orderButton.disabled = false;
+            confirmButton.textContent = "주문 확정";
+        }
     }
 
     function resetForm() {
@@ -868,12 +930,39 @@
                 </div>
 
                 <div class="order-time">
-                    ${order.time}
+                    ${escapeHtml(order.time)}
                 </div>
             `;
 
             list.appendChild(item);
         });
+    }
+
+    function showSuccess(message) {
+        const success = document.getElementById("success");
+
+        success.textContent = message;
+        success.style.display = "block";
+
+        setTimeout(function() {
+            success.style.display = "none";
+        }, 4000);
+    }
+
+    function showError(message) {
+        const error = document.getElementById("error");
+
+        error.textContent = message;
+        error.style.display = "block";
+
+        setTimeout(function() {
+            error.style.display = "none";
+        }, 5000);
+    }
+
+    function hideMessage() {
+        document.getElementById("success").style.display = "none";
+        document.getElementById("error").style.display = "none";
     }
 
     function escapeHtml(text) {
