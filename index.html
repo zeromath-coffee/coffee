@@ -1,1031 +1,724 @@
+```html
 <!DOCTYPE html>
-
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>COFFEE & Fruit cheong - 음료 주문 게시판</title>
 
-```
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Playfair+Display:wght@600;700&display=swap');
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Playfair+Display:wght@600;700&display=swap');
 
-    * {
-        box-sizing: border-box;
-    }
-
-    body {
-        margin: 0;
-        background: #f5efe7;
-        color: #3d3028;
-        font-family: 'Noto Sans KR', sans-serif;
-    }
-
-    .wrapper {
-        max-width: 900px;
-        margin: 0 auto;
-        padding: 30px 20px 60px;
-    }
-
-    .header {
-        background: #4b3428;
-        color: white;
-        border-radius: 22px;
-        padding: 45px 30px;
-        text-align: center;
-        margin-bottom: 25px;
-        box-shadow: 0 10px 30px rgba(70, 45, 30, 0.15);
-    }
-
-    .logo {
-        font-family: 'Playfair Display', serif;
-        font-size: 42px;
-        letter-spacing: 3px;
-        margin-bottom: 8px;
-    }
-
-    .subtitle {
-        font-size: 14px;
-        opacity: 0.8;
-    }
-
-    .header-line {
-        width: 45px;
-        height: 2px;
-        background: #d6b28a;
-        margin: 20px auto;
-    }
-
-    .notice {
-        font-size: 14px;
-        line-height: 1.7;
-        color: #eadfd5;
-    }
-
-    .section {
-        background: #fffdf9;
-        border-radius: 18px;
-        padding: 28px;
-        margin-bottom: 25px;
-        box-shadow: 0 5px 20px rgba(70, 45, 30, 0.07);
-    }
-
-    .section-title {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 20px;
-    }
-
-    .section-title h2 {
-        margin: 0;
-        font-size: 21px;
-    }
-
-    .section-title span {
-        font-size: 13px;
-        color: #9a8373;
-    }
-
-    .menu {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
-    }
-
-    .drink {
-        position: relative;
-        padding: 22px;
-        background: #faf6f0;
-        border: 2px solid transparent;
-        border-radius: 15px;
-        cursor: pointer;
-        transition: 0.2s;
-    }
-
-    .drink:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 7px 15px rgba(70, 45, 30, 0.08);
-    }
-
-    .drink.selected {
-        border-color: #8b5e3c;
-        background: #f4e9dc;
-    }
-
-    .drink-icon {
-        font-size: 30px;
-        margin-bottom: 12px;
-    }
-
-    .drink-name {
-        font-size: 17px;
-        font-weight: 700;
-        margin-bottom: 5px;
-    }
-
-    .drink-description {
-        font-size: 12px;
-        color: #927e70;
-        margin-bottom: 12px;
-    }
-
-    .price {
-        font-weight: 700;
-        color: #795237;
-    }
-
-    .check {
-        display: none;
-        position: absolute;
-        right: 15px;
-        top: 15px;
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        background: #795237;
-        color: white;
-        text-align: center;
-        line-height: 24px;
-        font-size: 13px;
-    }
-
-    .drink.selected .check {
-        display: block;
-    }
-
-    .form-group {
-        margin-bottom: 18px;
-    }
-
-    label {
-        display: block;
-        font-size: 14px;
-        font-weight: 700;
-        margin-bottom: 8px;
-    }
-
-    input {
-        width: 100%;
-        border: 1px solid #ded3c9;
-        background: #fff;
-        border-radius: 10px;
-        padding: 13px 14px;
-        font-size: 15px;
-        color: #3d3028;
-        outline: none;
-    }
-
-    input:focus {
-        border-color: #9a7050;
-    }
-
-    .quantity {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .quantity button {
-        width: 42px;
-        height: 42px;
-        border: none;
-        border-radius: 9px;
-        background: #eee4da;
-        color: #5d4739;
-        font-size: 20px;
-        cursor: pointer;
-    }
-
-    .quantity input {
-        text-align: center;
-    }
-
-    .order-button {
-        width: 100%;
-        border: none;
-        border-radius: 12px;
-        padding: 15px;
-        background: #795237;
-        color: white;
-        font-size: 16px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: 0.2s;
-    }
-
-    .order-button:hover {
-        background: #60412f;
-    }
-
-    .order-button:disabled,
-    .confirm-button:disabled {
-        opacity: 0.65;
-        cursor: wait;
-    }
-
-    .order-list {
-        border-top: 1px solid #e8ddd3;
-    }
-
-    .order-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 17px 5px;
-        border-bottom: 1px solid #eee5dc;
-    }
-
-    .order-info {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .order-number {
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        background: #eee3d8;
-        text-align: center;
-        line-height: 30px;
-        font-size: 12px;
-        font-weight: 700;
-    }
-
-    .order-name {
-        font-weight: 700;
-        font-size: 14px;
-    }
-
-    .order-drink {
-        color: #877468;
-        font-size: 13px;
-        margin-top: 3px;
-    }
-
-    .order-total {
-        color: #795237;
-        font-size: 12px;
-        font-weight: 700;
-        margin-top: 3px;
-    }
-
-    .order-time {
-        color: #aaa;
-        font-size: 11px;
-        text-align: right;
-    }
-
-    .empty {
-        text-align: center;
-        padding: 30px 0;
-        color: #a4958b;
-        font-size: 14px;
-    }
-
-    .success,
-    .error {
-        display: none;
-        border-radius: 10px;
-        padding: 13px;
-        margin-bottom: 18px;
-        text-align: center;
-        font-size: 14px;
-    }
-
-    .success {
-        background: #edf5ed;
-        color: #4e7252;
-    }
-
-    .error {
-        background: #fff0ed;
-        color: #a34d3d;
-    }
-
-    footer {
-        text-align: center;
-        color: #a28e80;
-        font-size: 12px;
-        margin-top: 30px;
-        line-height: 1.7;
-    }
-
-    .modal {
-        display: none;
-        position: fixed;
-        z-index: 1000;
-        inset: 0;
-        background: rgba(45, 31, 23, 0.58);
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-    }
-
-    .modal.show {
-        display: flex;
-    }
-
-    .modal-content {
-        width: 100%;
-        max-width: 430px;
-        background: #fffdf9;
-        border-radius: 20px;
-        padding: 30px;
-        box-shadow: 0 15px 45px rgba(45, 31, 23, 0.25);
-        animation: modalOpen 0.2s ease-out;
-    }
-
-    @keyframes modalOpen {
-        from {
-            opacity: 0;
-            transform: translateY(12px) scale(0.97);
+        * {
+            box-sizing: border-box;
         }
 
-        to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
+        body {
+            margin: 0;
+            background: #f5efe7;
+            color: #3d3028;
+            font-family: 'Noto Sans KR', sans-serif;
         }
-    }
 
-    .modal-title {
-        margin: 0 0 8px;
-        text-align: center;
-        font-size: 23px;
-    }
-
-    .modal-subtitle {
-        margin: 0 0 24px;
-        text-align: center;
-        color: #927e70;
-        font-size: 13px;
-    }
-
-    .receipt {
-        border-top: 1px dashed #d8c8ba;
-        border-bottom: 1px dashed #d8c8ba;
-        padding: 18px 0;
-        margin-bottom: 22px;
-    }
-
-    .receipt-row {
-        display: flex;
-        justify-content: space-between;
-        gap: 20px;
-        margin-bottom: 13px;
-        font-size: 14px;
-    }
-
-    .receipt-row:last-child {
-        margin-bottom: 0;
-    }
-
-    .receipt-label {
-        color: #927e70;
-    }
-
-    .receipt-value {
-        font-weight: 700;
-        text-align: right;
-    }
-
-    .receipt-total {
-        margin-top: 16px;
-        padding-top: 16px;
-        border-top: 1px solid #eee2d8;
-        font-size: 17px;
-    }
-
-    .modal-actions {
-        display: flex;
-        gap: 10px;
-    }
-
-    .modal-actions button {
-        flex: 1;
-        border: none;
-        border-radius: 10px;
-        padding: 13px;
-        font-size: 14px;
-        font-weight: 700;
-        cursor: pointer;
-    }
-
-    .cancel-button {
-        background: #eee4da;
-        color: #5d4739;
-    }
-
-    .confirm-button {
-        background: #795237;
-        color: white;
-    }
-
-    .confirm-button:hover {
-        background: #60412f;
-    }
-
-    @media (max-width: 600px) {
         .wrapper {
-            padding: 15px 12px 40px;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px 20px 60px;
         }
 
+        /* 헤더 */
         .header {
-            padding: 35px 20px;
-            border-radius: 18px;
+            background: #4b3428;
+            color: white;
+            border-radius: 22px;
+            padding: 45px 30px;
+            text-align: center;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(70, 45, 30, 0.15);
         }
 
         .logo {
-            font-size: 32px;
+            font-family: 'Playfair Display', serif;
+            font-size: 42px;
+            letter-spacing: 3px;
+            margin-bottom: 8px;
         }
 
+        .subtitle {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .header-line {
+            width: 45px;
+            height: 2px;
+            background: #d6b28a;
+            margin: 20px auto;
+        }
+
+        .notice {
+            font-size: 14px;
+            line-height: 1.7;
+            color: #eadfd5;
+        }
+
+        /* 공통 카드 */
         .section {
-            padding: 20px;
+            background: #fffdf9;
+            border-radius: 18px;
+            padding: 28px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 20px rgba(70, 45, 30, 0.07);
         }
 
+        .section-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .section-title h2 {
+            margin: 0;
+            font-size: 21px;
+        }
+
+        .section-title span {
+            font-size: 13px;
+            color: #9a8373;
+        }
+
+        /* 메뉴 */
         .menu {
-            grid-template-columns: 1fr;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .drink {
+            position: relative;
+            padding: 22px;
+            background: #faf6f0;
+            border: 2px solid transparent;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .drink:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 15px rgba(70, 45, 30, 0.08);
+        }
+
+        .drink.selected {
+            border-color: #8b5e3c;
+            background: #f4e9dc;
+        }
+
+        .drink-icon {
+            font-size: 30px;
+            margin-bottom: 12px;
+        }
+
+        .drink-name {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .drink-description {
+            font-size: 12px;
+            color: #927e70;
+            margin-bottom: 12px;
+        }
+
+        .price {
+            font-weight: 700;
+            color: #795237;
+        }
+
+        .check {
+            display: none;
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #795237;
+            color: white;
+            text-align: center;
+            line-height: 24px;
+            font-size: 13px;
+        }
+
+        .drink.selected .check {
+            display: block;
+        }
+
+        /* 주문 폼 */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            border: 1px solid #ded3c9;
+            background: #fff;
+            border-radius: 10px;
+            padding: 13px 14px;
+            font-size: 15px;
+            color: #3d3028;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #9a7050;
+        }
+
+        .quantity {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quantity button {
+            width: 42px;
+            height: 42px;
+            border: none;
+            border-radius: 9px;
+            background: #eee4da;
+            color: #5d4739;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .quantity input {
+            text-align: center;
+        }
+
+        /* 주문 버튼 */
+        .order-button {
+            width: 100%;
+            border: none;
+            border-radius: 12px;
+            padding: 15px;
+            background: #795237;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .order-button:hover {
+            background: #60412f;
+        }
+
+        /* 주문 게시판 */
+        .order-list {
+            border-top: 1px solid #e8ddd3;
         }
 
         .order-item {
-            align-items: flex-start;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 17px 5px;
+            border-bottom: 1px solid #eee5dc;
+        }
+
+        .order-info {
+            display: flex;
+            align-items: center;
             gap: 12px;
         }
 
+        .order-number {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #eee3d8;
+            text-align: center;
+            line-height: 30px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .order-name {
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .order-drink {
+            color: #877468;
+            font-size: 13px;
+            margin-top: 3px;
+        }
+
+        .order-total {
+            color: #795237;
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 3px;
+        }
+
         .order-time {
-            white-space: nowrap;
+            color: #aaa;
+            font-size: 11px;
+            text-align: right;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 30px 0;
+            color: #a4958b;
+            font-size: 14px;
+        }
+
+        /* 메시지 */
+        .success,
+        .error {
+            display: none;
+            border-radius: 10px;
+            padding: 13px;
+            margin-bottom: 18px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .success {
+            background: #edf5ed;
+            color: #4e7252;
+        }
+
+        .error {
+            background: #fff0ed;
+            color: #a34d3d;
+        }
+
+        /* 푸터 */
+        footer {
+            text-align: center;
+            color: #a28e80;
+            font-size: 12px;
+            margin-top: 30px;
+            line-height: 1.7;
+        }
+
+        /* 주문 확인 모달 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            inset: 0;
+            background: rgba(45, 31, 23, 0.58);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.show {
+            display: flex;
         }
 
         .modal-content {
-            padding: 24px 20px;
+            width: 100%;
+            max-width: 430px;
+            background: #fffdf9;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 45px rgba(45, 31, 23, 0.25);
+            animation: modalOpen 0.2s ease-out;
         }
-    }
-</style>
-```
 
+        @keyframes modalOpen {
+            from {
+                opacity: 0;
+                transform: translateY(12px) scale(0.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-title {
+            margin: 0 0 8px;
+            text-align: center;
+            font-size: 23px;
+        }
+
+        .modal-subtitle {
+            margin: 0 0 24px;
+            text-align: center;
+            color: #927e70;
+            font-size: 13px;
+        }
+
+        .receipt {
+            border-top: 1px dashed #d8c8ba;
+            border-bottom: 1px dashed #d8c8ba;
+            padding: 18px 0;
+            margin-bottom: 22px;
+        }
+
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 13px;
+            font-size: 14px;
+        }
+
+        .receipt-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .receipt-label {
+            color: #927e70;
+        }
+
+        .receipt-value {
+            font-weight: 700;
+            text-align: right;
+        }
+
+        .receipt-total {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #eee2d8;
+            font-size: 17px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-actions button {
+            flex: 1;
+            border: none;
+            border-radius: 10px;
+            padding: 13px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .cancel-button {
+            background: #eee4da;
+            color: #5d4739;
+        }
+
+        .confirm-button {
+            background: #795237;
+            color: white;
+        }
+
+        .confirm-button:hover {
+            background: #60412f;
+        }
+
+        /* 모바일 */
+        @media (max-width: 600px) {
+
+            .wrapper {
+                padding: 15px 12px 40px;
+            }
+
+            .header {
+                padding: 35px 20px;
+                border-radius: 18px;
+            }
+
+            .logo {
+                font-size: 32px;
+            }
+
+            .section {
+                padding: 20px;
+            }
+
+            .menu {
+                grid-template-columns: 1fr;
+            }
+
+            .order-item {
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .order-time {
+                white-space: nowrap;
+            }
+
+            .modal-content {
+                padding: 24px 20px;
+            }
+        }
+    </style>
 </head>
+
 
 <body>
 
 <div class="wrapper">
 
-```
-<header class="header">
-    <div class="logo">
-        COFFEE & Fruit cheong
-    </div>
+    <!-- 헤더 -->
+    <header class="header">
 
-    <div class="subtitle">
-        DAILY COFFEE & DRINK
-    </div>
-
-    <div class="header-line"></div>
-
-    <div class="notice">
-        오늘 마실 음료를 선택해주세요 ☕<br>
-        주문자 이름을 남겨주시면 주문이 접수됩니다.
-    </div>
-</header>
-
-<section class="section">
-
-    <div class="section-title">
-        <h2>☕ 오늘의 메뉴</h2>
-        <span>원하는 음료를 선택하세요</span>
-    </div>
-
-    <div class="menu">
-
-        <div class="drink" onclick="selectDrink('아메리카노', 1500, this)">
-            <div class="check">✓</div>
-            <div class="drink-icon">☕</div>
-            <div class="drink-name">아메리카노</div>
-            <div class="drink-description">
-                깔끔하고 진한 에스프레소
-            </div>
-            <div class="price">1,500원</div>
+        <div class="logo">
+            COFFEE & Fruit cheong
         </div>
 
-        <div class="drink" onclick="selectDrink('라떼', 2000, this)">
-            <div class="check">✓</div>
-            <div class="drink-icon">🥛</div>
-            <div class="drink-name">라떼</div>
-            <div class="drink-description">
-                부드러운 우유와 에스프레소
-            </div>
-            <div class="price">2,000원</div>
+        <div class="subtitle">
+            DAILY COFFEE & DRINK
         </div>
 
-        <div class="drink" onclick="selectDrink('바닐라 라떼', 2500, this)">
-            <div class="check">✓</div>
-            <div class="drink-icon">🍨</div>
-            <div class="drink-name">바닐라 라떼</div>
-            <div class="drink-description">
-                달콤한 바닐라 향의 라떼
-            </div>
-            <div class="price">2,500원</div>
+        <div class="header-line"></div>
+
+        <div class="notice">
+            오늘 마실 음료를 선택해주세요 ☕<br>
+            주문자 이름을 남겨주시면 주문이 접수됩니다.
         </div>
 
-        <div class="drink" onclick="selectDrink('과일 에이드', 2500, this)">
-            <div class="check">✓</div>
-            <div class="drink-icon">🍹</div>
-            <div class="drink-name">과일 에이드</div>
-            <div class="drink-description">
-                상큼하고 시원한 과일 탄산음료
-            </div>
-            <div class="price">2,500원</div>
+    </header>
+
+
+    <!-- 메뉴 -->
+    <section class="section">
+
+        <div class="section-title">
+            <h2>☕ 오늘의 메뉴</h2>
+            <span>원하는 음료를 선택하세요</span>
         </div>
 
-    </div>
 
-</section>
+        <div class="menu">
 
-<section class="section">
+            <!-- 아메리카노 -->
+            <div
+                class="drink"
+                onclick="selectDrink('아메리카노', 1500, this)"
+            >
 
-    <div class="section-title">
-        <h2>📝 주문하기</h2>
-        <span>주문 정보를 입력해주세요</span>
-    </div>
+                <div class="check">✓</div>
 
-    <div id="success" class="success"></div>
-    <div id="error" class="error"></div>
+                <div class="drink-icon">
+                    ☕
+                </div>
 
-    <div class="form-group">
-        <label for="name">주문자 이름</label>
+                <div class="drink-name">
+                    아메리카노
+                </div>
 
-        <input
-            type="text"
-            id="name"
-            placeholder="이름을 입력해주세요"
-            maxlength="30"
-        >
-    </div>
+                <div class="drink-description">
+                    깔끔하고 진한 에스프레소
+                </div>
 
-    <div class="form-group">
-        <label for="selectedDrink">선택한 음료</label>
+                <div class="price">
+                    1,500원
+                </div>
 
-        <input
-            type="text"
-            id="selectedDrink"
-            placeholder="위 메뉴에서 음료를 선택해주세요"
-            readonly
-        >
-    </div>
+            </div>
 
-    <div class="form-group">
-        <label>수량</label>
 
-        <div class="quantity">
-            <button type="button" onclick="changeQuantity(-1)">−</button>
+            <!-- 라떼 -->
+            <div
+                class="drink"
+                onclick="selectDrink('라떼', 2000, this)"
+            >
+
+                <div class="check">✓</div>
+
+                <div class="drink-icon">
+                    🥛
+                </div>
+
+                <div class="drink-name">
+                    라떼
+                </div>
+
+                <div class="drink-description">
+                    부드러운 우유와 에스프레소
+                </div>
+
+                <div class="price">
+                    2,000원
+                </div>
+
+            </div>
+
+
+            <!-- 바닐라 라떼 -->
+            <div
+                class="drink"
+                onclick="selectDrink('바닐라 라떼', 2500, this)"
+            >
+
+                <div class="check">✓</div>
+
+                <div class="drink-icon">
+                    🍨
+                </div>
+
+                <div class="drink-name">
+                    바닐라 라떼
+                </div>
+
+                <div class="drink-description">
+                    달콤한 바닐라 향의 라떼
+                </div>
+
+                <div class="price">
+                    2,500원
+                </div>
+
+            </div>
+
+
+            <!-- 과일 에이드 -->
+            <div
+                class="drink"
+                onclick="selectDrink('과일 에이드', 2500, this)"
+            >
+
+                <div class="check">✓</div>
+
+                <div class="drink-icon">
+                    🍹
+                </div>
+
+                <div class="drink-name">
+                    과일 에이드
+                </div>
+
+                <div class="drink-description">
+                    상큼하고 시원한 과일 탄산음료
+                </div>
+
+                <div class="price">
+                    2,500원
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- 주문하기 -->
+    <section class="section">
+
+        <div class="section-title">
+
+            <h2>📝 주문하기</h2>
+
+            <span>
+                주문 정보를 입력해주세요
+            </span>
+
+        </div>
+
+
+        <div id="success" class="success"></div>
+
+        <div id="error" class="error"></div>
+
+
+        <!-- 주문자 -->
+        <div class="form-group">
+
+            <label for="name">
+                주문자 이름
+            </label>
 
             <input
                 type="text"
-                id="quantity"
-                value="1"
+                id="name"
+                placeholder="이름을 입력해주세요"
+                maxlength="30"
+            >
+
+        </div>
+
+
+        <!-- 선택 음료 -->
+        <div class="form-group">
+
+            <label for="selectedDrink">
+                선택한 음료
+            </label>
+
+            <input
+                type="text"
+                id="selectedDrink"
+                placeholder="위 메뉴에서 음료를 선택해주세요"
                 readonly
             >
 
-            <button type="button" onclick="changeQuantity(1)">+</button>
-        </div>
-    </div>
-
-    <button
-        type="button"
-        class="order-button"
-        onclick="submitOrder()"
-    >
-        주문 등록하기
-    </button>
-
-</section>
-
-<section class="section">
-
-    <div class="section-title">
-        <h2>📋 오늘의 주문</h2>
-
-        <span id="orderCount">
-            0건
-        </span>
-    </div>
-
-    <div class="order-list" id="orderList">
-        <div class="empty">
-            아직 등록된 주문이 없습니다.
-        </div>
-    </div>
-
-</section>
-
-<footer>
-    COFFEE & Fruit cheong<br>
-    좋은 하루, 좋은 커피 ☕
-</footer>
-```
-
-</div>
-
-<div
-    id="orderModal"
-    class="modal"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="modalTitle"
-    onclick="closeModalByBackground(event)"
->
-    <div class="modal-content">
-
-```
-    <h2 id="modalTitle" class="modal-title">
-        주문 내용을 확인해주세요
-    </h2>
-
-    <p class="modal-subtitle">
-        아래 내용이 맞으면 주문 확정 버튼을 눌러주세요.
-    </p>
-
-    <div class="receipt">
-
-        <div class="receipt-row">
-            <span class="receipt-label">주문자</span>
-            <span id="confirmName" class="receipt-value"></span>
         </div>
 
-        <div class="receipt-row">
-            <span class="receipt-label">음료</span>
-            <span id="confirmDrink" class="receipt-value"></span>
+
+        <!-- 수량 -->
+        <div class="form-group">
+
+            <label>
+                수량
+            </label>
+
+            <div class="quantity">
+
+                <button
+                    type="button"
+                    onclick="changeQuantity(-1)"
+                >
+                    −
+                </button>
+
+                <input
+                    type="text"
+                    id="quantity"
+                    value="1"
+                    readonly
+                >
+
+                <button
+                    type="button"
+                    onclick="changeQuantity(1)"
+                >
+                    +
+                </button>
+
+            </div>
+
         </div>
 
-        <div class="receipt-row">
-            <span class="receipt-label">수량</span>
-            <span id="confirmQuantity" class="receipt-value"></span>
-        </div>
-
-        <div class="receipt-row receipt-total">
-            <span class="receipt-label">총 금액</span>
-            <span id="confirmTotal" class="receipt-value"></span>
-        </div>
-
-    </div>
-
-    <div class="modal-actions">
-        <button
-            type="button"
-            class="cancel-button"
-            onclick="closeModal()"
-        >
-            다시 입력
-        </button>
 
         <button
             type="button"
-            class="confirm-button"
-            onclick="confirmOrder()"
+            class="order-button"
+            onclick="submitOrder()"
         >
-            주문 확정
+            주문 등록하기
         </button>
-    </div>
 
-</div>
+    </section>
+
+
+    <!-- 오늘의 주문 -->
+    <section class="section">
+
+        <div class="section-titl
 ```
-
-</div>
-
-<script>
-    const GOOGLE_SCRIPT_URL = "여기에\_구글_앱스_스크립트_웹앱_URL을_입력하세요";
-    const STORAGE_KEY = "coffee_fruit_cheong_orders";
-
-    let selectedDrink = "";
-    let selectedPrice = 0;
-    let quantity = 1;
-    let orders = [];
-    let pendingOrder = null;
-
-    document.addEventListener("DOMContentLoaded", function() {
-        loadOrders();
-        renderOrders();
-    });
-
-    function selectDrink(name, price, element) {
-        selectedDrink = name;
-        selectedPrice = price;
-
-        document.querySelectorAll(".drink").forEach(function(card) {
-            card.classList.remove("selected");
-        });
-
-        element.classList.add("selected");
-
-        document.getElementById("selectedDrink").value =
-            name + " (" + price.toLocaleString() + "원)";
-    }
-
-    function changeQuantity(value) {
-        quantity += value;
-
-        if (quantity < 1) {
-            quantity = 1;
-        }
-
-        if (quantity > 10) {
-            quantity = 10;
-        }
-
-        document.getElementById("quantity").value = quantity;
-    }
-
-    function submitOrder() {
-        const name = document.getElementById("name").value.trim();
-
-        hideMessage();
-
-        if (name === "") {
-            showError("주문자 이름을 입력해주세요.");
-            document.getElementById("name").focus();
-            return;
-        }
-
-        if (selectedDrink === "") {
-            showError("음료를 선택해주세요.");
-            return;
-        }
-
-        pendingOrder = {
-            name: name,
-            drink: selectedDrink,
-            quantity: quantity,
-            price: selectedPrice,
-            total: selectedPrice * quantity
-        };
-
-        document.getElementById("confirmName").textContent =
-            pendingOrder.name;
-
-        document.getElementById("confirmDrink").textContent =
-            pendingOrder.drink;
-
-        document.getElementById("confirmQuantity").textContent =
-            pendingOrder.quantity + "잔";
-
-        document.getElementById("confirmTotal").textContent =
-            pendingOrder.total.toLocaleString() + "원";
-
-        openModal();
-    }
-
-    function openModal() {
-        const modal = document.getElementById("orderModal");
-
-        modal.classList.add("show");
-        document.body.style.overflow = "hidden";
-
-        setTimeout(function() {
-            document.querySelector(".confirm-button").focus();
-        }, 0);
-    }
-
-    function closeModal() {
-        const modal = document.getElementById("orderModal");
-
-        modal.classList.remove("show");
-        document.body.style.overflow = "";
-        pendingOrder = null;
-    }
-
-    function closeModalByBackground(event) {
-        if (event.target.id === "orderModal") {
-            closeModal();
-        }
-    }
-
-    async function confirmOrder() {
-        if (!pendingOrder) {
-            return;
-        }
-
-        const order = {
-            name: pendingOrder.name,
-            drink: pendingOrder.drink,
-            quantity: pendingOrder.quantity,
-            price: pendingOrder.price,
-            total: pendingOrder.total,
-            time: new Date().toLocaleString("ko-KR")
-        };
-
-        const confirmButton =
-            document.querySelector(".confirm-button");
-
-        const orderButton =
-            document.querySelector(".order-button");
-
-        confirmButton.disabled = true;
-        orderButton.disabled = true;
-        confirmButton.textContent = "저장 중...";
-
-        try {
-            const hasGoogleScriptUrl =
-                GOOGLE_SCRIPT_URL &&
-                !GOOGLE_SCRIPT_URL.includes("여기에\_구글_앱스_스크립트");
-
-            if (hasGoogleScriptUrl) {
-                await fetch(GOOGLE_SCRIPT_URL, {
-                    method: "POST",
-                    mode: "no-cors",
-                    headers: {
-                        "Content-Type": "text/plain;charset=utf-8"
-                    },
-                    body: JSON.stringify(order)
-                });
-            }
-
-            /*
-             * 핵심 수정 부분
-             * 주문을 Google Sheets로 보내는 것과 별개로,
-             * 현재 브라우저의 주문 목록에도 즉시 추가합니다.
-             */
-            orders.push(order);
-            saveOrders();
-            renderOrders();
-
-            closeModal();
-
-            if (hasGoogleScriptUrl) {
-                showSuccess("주문이 접수되었고 오늘의 주문에 표시되었습니다. ☕");
-            } else {
-                showSuccess("주문이 오늘의 주문에 표시되었습니다. Google Sheets 저장은 설정되지 않았습니다.");
-            }
-
-            resetForm();
-
-        } catch (error) {
-            console.error(error);
-
-            /*
-             * Google Apps Script 전송에 실패하더라도
-             * 현재 화면에는 주문을 표시합니다.
-             */
-            orders.push(order);
-            saveOrders();
-            renderOrders();
-
-            closeModal();
-
-            showError(
-                "서버 저장에는 실패했지만 주문을 현재 화면에 표시했습니다. " +
-                "Google Apps Script URL과 배포 권한을 확인해주세요."
-            );
-
-            resetForm();
-
-        } finally {
-            confirmButton.disabled = false;
-            orderButton.disabled = false;
-            confirmButton.textContent = "주문 확정";
-        }
-    }
-
-    function resetForm() {
-        document.getElementById("name").value = "";
-
-        selectedDrink = "";
-        selectedPrice = 0;
-
-        document.getElementById("selectedDrink").value = "";
-
-        quantity = 1;
-        document.getElementById("quantity").value = 1;
-
-        document.querySelectorAll(".drink").forEach(function(card) {
-            card.classList.remove("selected");
-        });
-    }
-
-    function saveOrders() {
-        try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(orders));
-        } catch (error) {
-            console.error("주문 목록 저장 실패:", error);
-        }
-    }
-
-    function loadOrders() {
-        try {
-            const savedOrders = localStorage.getItem(STORAGE_KEY);
-
-            if (savedOrders) {
-                const parsedOrders = JSON.parse(savedOrders);
-
-                if (Array.isArray(parsedOrders)) {
-                    orders = parsedOrders;
-                }
-            }
-        } catch (error) {
-            console.error("주문 목록 불러오기 실패:", error);
-            orders = [];
-        }
-    }
-
-    function renderOrders() {
-        const list = document.getElementById("orderList");
-        const count = document.getElementById("orderCount");
-
-        count.textContent = orders.length + "건";
-
-        if (orders.length === 0) {
-            list.innerHTML = `
-                <div class="empty">
-                    아직 등록된 주문이 없습니다.
-                </div>
-            `;
-
-            return;
-        }
-
-        list.innerHTML = "";
-
-        orders.forEach(function(order, index) {
-            const item = document.createElement("div");
-
-            item.className = "order-item";
-
-            const safeName = escapeHtml(order.name);
-            const safeDrink = escapeHtml(order.drink);
-            const safeTime = escapeHtml(order.time || "");
-            const orderQuantity = Number(order.quantity) || 1;
-            const orderTotal = Number(order.total) || 0;
-
-            item.innerHTML = `
-                <div class="order-info">
-                    <div class="order-number">
-                        ${index + 1}
-                    </div>
-
-                    <div>
-                        <div class="order-name">
-                            ${safeName}
-                        </div>
-
-                        <div class="order-drink">
-                            ${safeDrink} × ${orderQuantity}
-                        </div>
-
-                        <div class="order-total">
-                            ${orderTotal.toLocaleString()}원
-                        </div>
-                    </div>
-                </div>
-
-                <div class="order-time">
-                    ${safeTime}
-                </div>
-            `;
-
-            list.appendChild(item);
-        });
-    }
-
-    function showSuccess(message) {
-        const success = document.getElementById("success");
-
-        success.textContent = message;
-        success.style.display = "block";
-
-        setTimeout(function() {
-            success.style.display = "none";
-        }, 5000);
-    }
-
-    function showError(message) {
-        const error = document.getElementById("error");
-
-        error.textContent = message;
-        error.style.display = "block";
-
-        setTimeout(function() {
-            error.style.display = "none";
-        }, 7000);
-    }
-
-    function hideMessage() {
-        document.getElementById("success").style.display = "none";
-        document.getElementById("error").style.display = "none";
-    }
-
-    function escapeHtml(text) {
-        const div = document.createElement("div");
-
-        div.textContent = String(text ?? "");
-
-        return div.innerHTML;
-    }
-
-    document.addEventListener("keydown", function(event) {
-        if (event.key === "Escape") {
-            closeModal();
-        }
-    });
-</script>
-
-</body>
-</html>
