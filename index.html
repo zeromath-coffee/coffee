@@ -1,4 +1,4 @@
-```html
+html
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -1519,7 +1519,96 @@
     );
 
 </script>
+<script>
+// 1. 발급받은 Google Apps Script URL 입력
+const GOOGLE_SCRIPT_URL = https://script.google.com/macros/s/AKfycbyDLO24QwO8ttmBURrm0SXUPFFLmopNyp7HET1cJzq0ZnF95_2Ilj1UPngIpnacUD2Yow/exec;
 
+let selectedDrink = "";
+let selectedPrice = 0;
+let quantity = 1;
+let pendingOrder = null;
+
+// 음료 선택
+function selectDrink(name, price, element) {
+    selectedDrink = name;
+    selectedPrice = price;
+    
+    document.querySelectorAll(".drink").forEach(card => card.classList.remove("selected"));
+    element.classList.add("selected");
+    document.getElementById("selectedDrink").value = `${name} (${price.toLocaleString()}원)`;
+}
+
+// 수량 변경
+function changeQuantity(val) {
+    quantity = Math.max(1, Math.min(10, quantity + val));
+    document.getElementById("quantity").value = quantity;
+}
+
+// 주문 제출 확인 (모달 오픈)
+function submitOrder() {
+    const name = document.getElementById("name").value.trim();
+    if (!name) return alert("주문자 이름을 입력해주세요.");
+    if (!selectedDrink) return alert("음료를 선택해주세요.");
+
+    pendingOrder = {
+        name: name,
+        drink: selectedDrink,
+        quantity: quantity,
+        price: selectedPrice,
+        total: selectedPrice * quantity,
+        time: new Date().toLocaleString("ko-KR")
+    };
+
+    // 구글 스프레드시트로 전송 실행
+    confirmOrder();
+}
+
+// 구글 스프레드시트 데이터 전송
+async function confirmOrder() {
+    if (!pendingOrder) return;
+
+    const orderBtn = document.querySelector(".order-button");
+    orderBtn.disabled = true;
+    orderBtn.textContent = "주문 전송 중...";
+
+    try {
+        await fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors", // CORS 제한 회피
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(pendingOrder)
+        });
+
+        // 성공 처리
+        const successEl = document.getElementById("success");
+        successEl.textContent = "주문이 성공적으로 스프레드시트에 저장되었습니다! ☕";
+        successEl.style.display = "block";
+
+        resetForm();
+    } catch (err) {
+        console.error(err);
+        const errorEl = document.getElementById("error");
+        errorEl.textContent = "주문 전송에 실패했습니다. 다시 시도해 주세요.";
+        errorEl.style.display = "block";
+    } finally {
+        orderBtn.disabled = false;
+        orderBtn.textContent = "주문 등록하기";
+    }
+}
+
+// 폼 초기화
+function resetForm() {
+    document.getElementById("name").value = "";
+    document.getElementById("selectedDrink").value = "";
+    document.getElementById("quantity").value = "1";
+    document.querySelectorAll(".drink").forEach(card => card.classList.remove("selected"));
+    selectedDrink = "";
+    selectedPrice = 0;
+    quantity = 1;
+}
+</script>
+
+    
 </body>
 </html>
 ```
