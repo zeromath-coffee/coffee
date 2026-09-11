@@ -46,6 +46,7 @@
         .quantity input { text-align: center; }
         .order-button { width: 100%; border: none; border-radius: 12px; padding: 15px; background: #795237; color: white; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.2s; }
         .order-button:hover { background: #60412f; }
+        .order-button:disabled { background: #ccc; cursor: not-allowed; }
 
         /* 주문 리스트 */
         .order-list { border-top: 1px solid #e8ddd3; }
@@ -169,13 +170,13 @@
                 <button type="button" onclick="changeQuantity(1)">+</button>
             </div>
         </div>
-        <button type="button" class="order-button" onclick="submitOrder()">주문 등록하기</button>
+        <button type="button" id="orderBtn" class="order-button" onclick="submitOrder()">주문 등록하기</button>
     </section>
 
     <section class="section">
         <div class="section-title">
             <h2>📋 오늘의 주문</h2>
-            <span id="orderCount">0건</span>
+            <span id="orderCount">0잔 / 총 20잔</span>
         </div>
         <div class="order-list" id="orderList">
             <div class="empty">아직 등록된 주문이 없습니다.</div>
@@ -218,8 +219,8 @@
 </div>
 
 <script>
-    // 1. 발급받은 Google Apps Script URL (큰따옴표 감싸기 필수)
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyDLO24QwO8ttmBURrm0SXUPFFLmopNyp7HET1cJzq0ZnF95_2Ilj1UPngIpnacUD2Yow/exec";
+    const MAX_LIMIT = 20; // 하루 한도 20잔 설정
 
     let selectedDrink = "";
     let selectedPrice = 0;
@@ -230,7 +231,13 @@
     document.addEventListener("DOMContentLoaded", function() {
         loadOrders();
         renderOrders();
+        checkSoldOut();
     });
+
+    // 현재 총 주문된 음료 잔 수 계산
+    function getTotalOrderedQuantity() {
+        return orders.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+    }
 
     function selectDrink(name, price, element) {
         selectedDrink = name;
@@ -250,6 +257,21 @@
     function submitOrder() {
         const name = document.getElementById("name").value.trim();
         hideMessage();
+
+        const currentTotal = getTotalOrderedQuantity();
+
+        // 1. 이미 20잔 마감된 경우
+        if (currentTotal >= MAX_LIMIT) {
+            showError("오늘 준비된 수량(20잔)이 모두 마감되었습니다.");
+            return;
+        }
+
+        // 2. 입력된 수량이 남은 수량을 초과하는 경우
+        if (currentTotal + quantity > MAX_LIMIT) {
+            const remaining = MAX_LIMIT - currentTotal;
+            showError(`현재 주문 가능한 수량은 ${remaining}잔입니다.`);
+            return;
+        }
 
         if (name === "") {
             showError("주문자 이름을 입력해주세요.");
@@ -302,7 +324,6 @@
         confirmBtn.textContent = "전송 중...";
 
         try {
-            // 구글 스프레드시트로 전송
             await fetch(GOOGLE_SCRIPT_URL, {
                 method: "POST",
                 mode: "no-cors",
@@ -310,10 +331,10 @@
                 body: JSON.stringify(pendingOrder)
             });
 
-            // 화면 게시판에 반영 및 저장
             orders.push(pendingOrder);
             saveOrders();
             renderOrders();
+            checkSoldOut();
 
             closeModal();
             showSuccess("주문이 성공적으로 접수되었습니다! ☕");
@@ -325,6 +346,19 @@
         } finally {
             confirmBtn.disabled = false;
             confirmBtn.textContent = "주문 확정";
+        }
+    }
+
+    function checkSoldOut() {
+        const currentTotal = getTotalOrderedQuantity();
+        const orderBtn = document.getElementById("orderBtn");
+
+        if (currentTotal >= MAX_LIMIT) {
+            orderBtn.disabled = true;
+            orderBtn.textContent = "오늘 주문 마감 (20잔 완료)";
+        } else {
+            orderBtn.disabled = false;
+            orderBtn.textContent = "주문 등록하기";
         }
     }
 
@@ -355,8 +389,9 @@
     function renderOrders() {
         const list = document.getElementById("orderList");
         const count = document.getElementById("orderCount");
+        const totalQty = getTotalOrderedQuantity();
 
-        count.textContent = orders.length + "건";
+        count.textContent = `${totalQty}잔 / 총 ${MAX_LIMIT}잔`;
 
         if (orders.length === 0) {
             list.innerHTML = `<div class="empty">아직 등록된 주문이 없습니다.</div>`;
