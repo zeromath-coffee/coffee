@@ -720,5 +720,806 @@
     <!-- 오늘의 주문 -->
     <section class="section">
 
-        <div class="section-titl
+        <div class="section-title">
+
+            <h2>
+                📋 오늘의 주문
+            </h2>
+
+            <span id="orderCount">
+                0건
+            </span>
+
+        </div>
+
+
+        <div
+            class="order-list"
+            id="orderList"
+        >
+
+            <div class="empty">
+                아직 등록된 주문이 없습니다.
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- 푸터 -->
+    <footer>
+        COFFEE & Fruit cheong<br>
+        좋은 하루, 좋은 커피 ☕
+    </footer>
+
+</div>
+
+
+<!-- 주문 확인 모달 -->
+<div
+    id="orderModal"
+    class="modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modalTitle"
+    onclick="closeModalByBackground(event)"
+>
+
+    <div class="modal-content">
+
+        <h2
+            id="modalTitle"
+            class="modal-title"
+        >
+            주문 내용을 확인해주세요
+        </h2>
+
+
+        <p class="modal-subtitle">
+            아래 내용이 맞으면 주문 확정 버튼을 눌러주세요.
+        </p>
+
+
+        <div class="receipt">
+
+            <div class="receipt-row">
+
+                <span class="receipt-label">
+                    주문자
+                </span>
+
+                <span
+                    id="confirmName"
+                    class="receipt-value"
+                ></span>
+
+            </div>
+
+
+            <div class="receipt-row">
+
+                <span class="receipt-label">
+                    음료
+                </span>
+
+                <span
+                    id="confirmDrink"
+                    class="receipt-value"
+                ></span>
+
+            </div>
+
+
+            <div class="receipt-row">
+
+                <span class="receipt-label">
+                    수량
+                </span>
+
+                <span
+                    id="confirmQuantity"
+                    class="receipt-value"
+                ></span>
+
+            </div>
+
+
+            <div class="receipt-row receipt-total">
+
+                <span class="receipt-label">
+                    총 금액
+                </span>
+
+                <span
+                    id="confirmTotal"
+                    class="receipt-value"
+                ></span>
+
+            </div>
+
+        </div>
+
+
+        <div class="modal-actions">
+
+            <button
+                type="button"
+                class="cancel-button"
+                onclick="closeModal()"
+            >
+                다시 입력
+            </button>
+
+
+            <button
+                type="button"
+                class="confirm-button"
+                onclick="confirmOrder()"
+            >
+                주문 확정
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    /*
+     * ==========================================
+     * 주문 데이터
+     * ==========================================
+     */
+
+    let selectedDrink = "";
+    let selectedPrice = 0;
+    let quantity = 1;
+
+    let orders = [];
+
+    let pendingOrder = null;
+
+
+    /*
+     * ==========================================
+     * 페이지가 열릴 때 실행
+     * ==========================================
+     */
+
+    document.addEventListener("DOMContentLoaded", function() {
+
+        loadOrders();
+
+        renderOrders();
+
+    });
+
+
+    /*
+     * ==========================================
+     * 음료 선택
+     * ==========================================
+     */
+
+    function selectDrink(name, price, element) {
+
+        selectedDrink = name;
+
+        selectedPrice = price;
+
+
+        // 기존 선택 제거
+        document.querySelectorAll(".drink").forEach(function(card) {
+
+            card.classList.remove("selected");
+
+        });
+
+
+        // 선택한 메뉴 강조
+        element.classList.add("selected");
+
+
+        // 선택한 음료 표시
+        document.getElementById("selectedDrink").value =
+            name + " (" + price.toLocaleString() + "원)";
+
+    }
+
+
+    /*
+     * ==========================================
+     * 수량 변경
+     * ==========================================
+     */
+
+    function changeQuantity(value) {
+
+        quantity += value;
+
+
+        if (quantity < 1) {
+            quantity = 1;
+        }
+
+
+        if (quantity > 10) {
+            quantity = 10;
+        }
+
+
+        document.getElementById("quantity").value =
+            quantity;
+
+    }
+
+
+    /*
+     * ==========================================
+     * 주문 등록 버튼
+     * ==========================================
+     */
+
+    function submitOrder() {
+
+        const name =
+            document.getElementById("name").value.trim();
+
+
+        hideMessage();
+
+
+        // 이름 확인
+        if (name === "") {
+
+            showError(
+                "주문자 이름을 입력해주세요."
+            );
+
+            document.getElementById("name").focus();
+
+            return;
+        }
+
+
+        // 음료 확인
+        if (selectedDrink === "") {
+
+            showError(
+                "음료를 선택해주세요."
+            );
+
+            return;
+        }
+
+
+        // 임시 주문 정보
+        pendingOrder = {
+
+            name: name,
+
+            drink: selectedDrink,
+
+            quantity: quantity,
+
+            price: selectedPrice,
+
+            total: selectedPrice * quantity
+
+        };
+
+
+        // 확인창 내용 표시
+        document.getElementById("confirmName").textContent =
+            pendingOrder.name;
+
+
+        document.getElementById("confirmDrink").textContent =
+            pendingOrder.drink;
+
+
+        document.getElementById("confirmQuantity").textContent =
+            pendingOrder.quantity + "잔";
+
+
+        document.getElementById("confirmTotal").textContent =
+            pendingOrder.total.toLocaleString() + "원";
+
+
+        openModal();
+
+    }
+
+
+    /*
+     * ==========================================
+     * 주문 확인창 열기
+     * ==========================================
+     */
+
+    function openModal() {
+
+        const modal =
+            document.getElementById("orderModal");
+
+
+        modal.classList.add("show");
+
+        document.body.style.overflow = "hidden";
+
+
+        setTimeout(function() {
+
+            document.querySelector(
+                ".confirm-button"
+            ).focus();
+
+        }, 0);
+
+    }
+
+
+    /*
+     * ==========================================
+     * 주문 확인창 닫기
+     * ==========================================
+     */
+
+    function closeModal() {
+
+        const modal =
+            document.getElementById("orderModal");
+
+
+        modal.classList.remove("show");
+
+        document.body.style.overflow = "";
+
+        pendingOrder = null;
+
+    }
+
+
+    /*
+     * 배경을 눌러도 닫기
+     */
+
+    function closeModalByBackground(event) {
+
+        if (event.target.id === "orderModal") {
+
+            closeModal();
+
+        }
+
+    }
+
+
+    /*
+     * ==========================================
+     * 주문 확정
+     * ==========================================
+     */
+
+    function confirmOrder() {
+
+        if (!pendingOrder) {
+            return;
+        }
+
+
+        const order = {
+
+            name: pendingOrder.name,
+
+            drink: pendingOrder.drink,
+
+            quantity: pendingOrder.quantity,
+
+            price: pendingOrder.price,
+
+            total: pendingOrder.total,
+
+            time: new Date().toLocaleString(
+                "ko-KR"
+            )
+
+        };
+
+
+        // 주문 배열에 추가
+        orders.push(order);
+
+
+        // 브라우저에 저장
+        saveOrders();
+
+
+        // 화면에 주문 표시
+        renderOrders();
+
+
+        // 확인창 닫기
+        closeModal();
+
+
+        // 완료 메시지
+        showSuccess(
+            "주문이 정상적으로 등록되었습니다. ☕"
+        );
+
+
+        // 입력값 초기화
+        resetForm();
+
+    }
+
+
+    /*
+     * ==========================================
+     * 입력폼 초기화
+     * ==========================================
+     */
+
+    function resetForm() {
+
+        document.getElementById("name").value =
+            "";
+
+
+        selectedDrink = "";
+
+        selectedPrice = 0;
+
+
+        document.getElementById(
+            "selectedDrink"
+        ).value = "";
+
+
+        quantity = 1;
+
+
+        document.getElementById(
+            "quantity"
+        ).value = 1;
+
+
+        // 메뉴 선택 해제
+        document.querySelectorAll(".drink").forEach(
+            function(card) {
+
+                card.classList.remove("selected");
+
+            }
+        );
+
+    }
+
+
+    /*
+     * ==========================================
+     * 주문 저장
+     *
+     * Google Sheets가 아니라
+     * 현재 브라우저의 localStorage 사용
+     * ==========================================
+     */
+
+    function saveOrders() {
+
+        try {
+
+            localStorage.setItem(
+                "coffee_fruit_cheong_orders",
+                JSON.stringify(orders)
+            );
+
+        } catch (error) {
+
+            console.error(
+                "주문 목록 저장 실패:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /*
+     * ==========================================
+     * 저장된 주문 불러오기
+     * ==========================================
+     */
+
+    function loadOrders() {
+
+        try {
+
+            const savedOrders =
+                localStorage.getItem(
+                    "coffee_fruit_cheong_orders"
+                );
+
+
+            if (savedOrders) {
+
+                const parsedOrders =
+                    JSON.parse(savedOrders);
+
+
+                if (Array.isArray(parsedOrders)) {
+
+                    orders = parsedOrders;
+
+                }
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "주문 목록 불러오기 실패:",
+                error
+            );
+
+            orders = [];
+
+        }
+
+    }
+
+
+    /*
+     * ==========================================
+     * 주문 목록 화면에 표시
+     * ==========================================
+     */
+
+    function renderOrders() {
+
+        const list =
+            document.getElementById(
+                "orderList"
+            );
+
+
+        const count =
+            document.getElementById(
+                "orderCount"
+            );
+
+
+        // 주문 건수
+        count.textContent =
+            orders.length + "건";
+
+
+        // 주문이 없는 경우
+        if (orders.length === 0) {
+
+            list.innerHTML = `
+                <div class="empty">
+                    아직 등록된 주문이 없습니다.
+                </div>
+            `;
+
+            return;
+
+        }
+
+
+        // 기존 목록 삭제
+        list.innerHTML = "";
+
+
+        // 주문 목록 생성
+        orders.forEach(function(order, index) {
+
+            const item =
+                document.createElement("div");
+
+
+            item.className =
+                "order-item";
+
+
+            const safeName =
+                escapeHtml(order.name);
+
+
+            const safeDrink =
+                escapeHtml(order.drink);
+
+
+            const safeTime =
+                escapeHtml(order.time || "");
+
+
+            const orderQuantity =
+                Number(order.quantity) || 1;
+
+
+            const orderTotal =
+                Number(order.total) || 0;
+
+
+            item.innerHTML = `
+
+                <div class="order-info">
+
+                    <div class="order-number">
+                        ${index + 1}
+                    </div>
+
+
+                    <div>
+
+                        <div class="order-name">
+                            ${safeName}
+                        </div>
+
+
+                        <div class="order-drink">
+                            ${safeDrink}
+                            × ${orderQuantity}
+                        </div>
+
+
+                        <div class="order-total">
+                            ${orderTotal.toLocaleString()}원
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="order-time">
+                    ${safeTime}
+                </div>
+
+            `;
+
+
+            list.appendChild(item);
+
+        });
+
+    }
+
+
+    /*
+     * ==========================================
+     * 성공 메시지
+     * ==========================================
+     */
+
+    function showSuccess(message) {
+
+        const success =
+            document.getElementById(
+                "success"
+            );
+
+
+        success.textContent =
+            message;
+
+
+        success.style.display =
+            "block";
+
+
+        setTimeout(function() {
+
+            success.style.display =
+                "none";
+
+        }, 5000);
+
+    }
+
+
+    /*
+     * ==========================================
+     * 오류 메시지
+     * ==========================================
+     */
+
+    function showError(message) {
+
+        const error =
+            document.getElementById(
+                "error"
+            );
+
+
+        error.textContent =
+            message;
+
+
+        error.style.display =
+            "block";
+
+
+        setTimeout(function() {
+
+            error.style.display =
+                "none";
+
+        }, 7000);
+
+    }
+
+
+    /*
+     * ==========================================
+     * 메시지 숨기기
+     * ==========================================
+     */
+
+    function hideMessage() {
+
+        document.getElementById(
+            "success"
+        ).style.display = "none";
+
+
+        document.getElementById(
+            "error"
+        ).style.display = "none";
+
+    }
+
+
+    /*
+     * ==========================================
+     * HTML 입력 방지
+     * ==========================================
+     */
+
+    function escapeHtml(text) {
+
+        const div =
+            document.createElement("div");
+
+
+        div.textContent =
+            String(text ?? "");
+
+
+        return div.innerHTML;
+
+    }
+
+
+    /*
+     * ==========================================
+     * ESC 키로 주문 확인창 닫기
+     * ==========================================
+     */
+
+    document.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (event.key === "Escape") {
+
+                closeModal();
+
+            }
+
+        }
+    );
+
+</script>
+
+</body>
+</html>
 ```
