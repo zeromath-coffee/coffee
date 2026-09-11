@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>COFFEE & Fruit cheong - 음료 주문 게시판</title>
 
-
+```
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Playfair+Display:wght@600;700&display=swap');
 
@@ -218,7 +218,8 @@
         background: #60412f;
     }
 
-    .order-button:disabled {
+    .order-button:disabled,
+    .confirm-button:disabled {
         opacity: 0.65;
         cursor: wait;
     }
@@ -263,6 +264,13 @@
         margin-top: 3px;
     }
 
+    .order-total {
+        color: #795237;
+        font-size: 12px;
+        font-weight: 700;
+        margin-top: 3px;
+    }
+
     .order-time {
         color: #aaa;
         font-size: 11px;
@@ -276,10 +284,9 @@
         font-size: 14px;
     }
 
-    .success {
+    .success,
+    .error {
         display: none;
-        background: #edf5ed;
-        color: #4e7252;
         border-radius: 10px;
         padding: 13px;
         margin-bottom: 18px;
@@ -287,15 +294,14 @@
         font-size: 14px;
     }
 
+    .success {
+        background: #edf5ed;
+        color: #4e7252;
+    }
+
     .error {
-        display: none;
         background: #fff0ed;
         color: #a34d3d;
-        border-radius: 10px;
-        padding: 13px;
-        margin-bottom: 18px;
-        text-align: center;
-        font-size: 14px;
     }
 
     footer {
@@ -420,11 +426,6 @@
         background: #60412f;
     }
 
-    .confirm-button:disabled {
-        opacity: 0.65;
-        cursor: wait;
-    }
-
     @media (max-width: 600px) {
         .wrapper {
             padding: 15px 12px 40px;
@@ -449,6 +450,11 @@
 
         .order-item {
             align-items: flex-start;
+            gap: 12px;
+        }
+
+        .order-time {
+            white-space: nowrap;
         }
 
         .modal-content {
@@ -456,7 +462,7 @@
         }
     }
 </style>
-
+```
 
 </head>
 
@@ -464,7 +470,7 @@
 
 <div class="wrapper">
 
-
+```
 <header class="header">
     <div class="logo">
         COFFEE & Fruit cheong
@@ -616,7 +622,7 @@
     COFFEE & Fruit cheong<br>
     좋은 하루, 좋은 커피 ☕
 </footer>
-
+```
 
 </div>
 
@@ -630,7 +636,7 @@
 >
     <div class="modal-content">
 
-
+```
     <h2 id="modalTitle" class="modal-title">
         주문 내용을 확인해주세요
     </h2>
@@ -682,22 +688,12 @@
     </div>
 
 </div>
-
+```
 
 </div>
 
 <script>
-    /*
-     * 아래 주소는 Google Apps Script의 웹 앱 배포 URL입니다.
-     *
-     * 사용자가 제공한 Google 스프레드시트 주소는 문서 주소이므로
-     * index.html의 fetch 주소로 직접 사용할 수 없습니다.
-     *
-     * 먼저 해당 스프레드시트에서 Apps Script를 만들고 웹 앱으로 배포한 뒤,
-     * 생성된 /exec 주소를 아래에 입력해야 합니다.
-     */
     const GOOGLE_SCRIPT_URL = "여기에\_구글_앱스_스크립트_웹앱_URL을_입력하세요";
-
     const STORAGE_KEY = "coffee_fruit_cheong_orders";
 
     let selectedDrink = "";
@@ -808,17 +804,14 @@
             return;
         }
 
-        if (
-            !GOOGLE_SCRIPT_URL ||
-            GOOGLE_SCRIPT_URL.includes("여기에\_구글_앱스_스크립트")
-        ) {
-            showError(
-                "Google Apps Script 웹 앱 URL이 설정되지 않았습니다. " +
-                "스프레드시트 주소가 아니라 Apps Script의 /exec 주소를 입력해주세요."
-            );
-            closeModal();
-            return;
-        }
+        const order = {
+            name: pendingOrder.name,
+            drink: pendingOrder.drink,
+            quantity: pendingOrder.quantity,
+            price: pendingOrder.price,
+            total: pendingOrder.total,
+            time: new Date().toLocaleString("ko-KR")
+        };
 
         const confirmButton =
             document.querySelector(".confirm-button");
@@ -830,48 +823,61 @@
         orderButton.disabled = true;
         confirmButton.textContent = "저장 중...";
 
-        const order = {
-            name: pendingOrder.name,
-            drink: pendingOrder.drink,
-            quantity: pendingOrder.quantity,
-            price: pendingOrder.price,
-            total: pendingOrder.total,
-            time: new Date().toLocaleString("ko-KR")
-        };
-
         try {
-            /*
-             * Google Apps Script doPost로 주문을 전송합니다.
-             * no-cors에서는 응답 내용을 읽을 수 없으므로,
-             * fetch가 오류 없이 완료되면 전송 성공으로 처리합니다.
-             */
-            await fetch(GOOGLE_SCRIPT_URL, {
-                method: "POST",
-                mode: "no-cors",
-                headers: {
-                    "Content-Type": "text/plain;charset=utf-8"
-                },
-                body: JSON.stringify(order)
-            });
+            const hasGoogleScriptUrl =
+                GOOGLE_SCRIPT_URL &&
+                !GOOGLE_SCRIPT_URL.includes("여기에\_구글_앱스_스크립트");
 
+            if (hasGoogleScriptUrl) {
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: {
+                        "Content-Type": "text/plain;charset=utf-8"
+                    },
+                    body: JSON.stringify(order)
+                });
+            }
+
+            /*
+             * 핵심 수정 부분
+             * 주문을 Google Sheets로 보내는 것과 별개로,
+             * 현재 브라우저의 주문 목록에도 즉시 추가합니다.
+             */
             orders.push(order);
             saveOrders();
             renderOrders();
 
             closeModal();
 
-            showSuccess("주문이 접수되었습니다. 맛있게 드세요! ☕");
+            if (hasGoogleScriptUrl) {
+                showSuccess("주문이 접수되었고 오늘의 주문에 표시되었습니다. ☕");
+            } else {
+                showSuccess("주문이 오늘의 주문에 표시되었습니다. Google Sheets 저장은 설정되지 않았습니다.");
+            }
 
             resetForm();
+
         } catch (error) {
             console.error(error);
 
-            showError(
-                "주문 저장 중 문제가 발생했습니다. " +
-                "Apps Script 웹 앱 URL과 배포 권한을 확인해주세요."
-            );
+            /*
+             * Google Apps Script 전송에 실패하더라도
+             * 현재 화면에는 주문을 표시합니다.
+             */
+            orders.push(order);
+            saveOrders();
+            renderOrders();
 
             closeModal();
+
+            showError(
+                "서버 저장에는 실패했지만 주문을 현재 화면에 표시했습니다. " +
+                "Google Apps Script URL과 배포 권한을 확인해주세요."
+            );
+
+            resetForm();
+
         } finally {
             confirmButton.disabled = false;
             orderButton.disabled = false;
@@ -943,6 +949,12 @@
 
             item.className = "order-item";
 
+            const safeName = escapeHtml(order.name);
+            const safeDrink = escapeHtml(order.drink);
+            const safeTime = escapeHtml(order.time || "");
+            const orderQuantity = Number(order.quantity) || 1;
+            const orderTotal = Number(order.total) || 0;
+
             item.innerHTML = `
                 <div class="order-info">
                     <div class="order-number">
@@ -951,18 +963,21 @@
 
                     <div>
                         <div class="order-name">
-                            ${escapeHtml(order.name)}
+                            ${safeName}
                         </div>
 
                         <div class="order-drink">
-                            ${escapeHtml(order.drink)}
-                            × ${Number(order.quantity) || 1}
+                            ${safeDrink} × ${orderQuantity}
+                        </div>
+
+                        <div class="order-total">
+                            ${orderTotal.toLocaleString()}원
                         </div>
                     </div>
                 </div>
 
                 <div class="order-time">
-                    ${escapeHtml(order.time || "")}
+                    ${safeTime}
                 </div>
             `;
 
@@ -978,7 +993,7 @@
 
         setTimeout(function() {
             success.style.display = "none";
-        }, 4000);
+        }, 5000);
     }
 
     function showError(message) {
@@ -989,7 +1004,7 @@
 
         setTimeout(function() {
             error.style.display = "none";
-        }, 6000);
+        }, 7000);
     }
 
     function hideMessage() {
