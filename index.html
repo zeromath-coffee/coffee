@@ -266,6 +266,7 @@
     .order-time {
         color: #aaa;
         font-size: 11px;
+        text-align: right;
     }
 
     .empty {
@@ -541,16 +542,11 @@
         <span>주문 정보를 입력해주세요</span>
     </div>
 
-    <div id="success" class="success">
-        주문이 접수되었습니다. 맛있게 드세요! ☕
-    </div>
-
+    <div id="success" class="success"></div>
     <div id="error" class="error"></div>
 
     <div class="form-group">
-        <label for="name">
-            주문자 이름
-        </label>
+        <label for="name">주문자 이름</label>
 
         <input
             type="text"
@@ -561,9 +557,7 @@
     </div>
 
     <div class="form-group">
-        <label for="selectedDrink">
-            선택한 음료
-        </label>
+        <label for="selectedDrink">선택한 음료</label>
 
         <input
             type="text"
@@ -574,14 +568,10 @@
     </div>
 
     <div class="form-group">
-        <label>
-            수량
-        </label>
+        <label>수량</label>
 
         <div class="quantity">
-            <button type="button" onclick="changeQuantity(-1)">
-                −
-            </button>
+            <button type="button" onclick="changeQuantity(-1)">−</button>
 
             <input
                 type="text"
@@ -590,9 +580,7 @@
                 readonly
             >
 
-            <button type="button" onclick="changeQuantity(1)">
-                +
-            </button>
+            <button type="button" onclick="changeQuantity(1)">+</button>
         </div>
     </div>
 
@@ -700,19 +688,28 @@
 
 <script>
     /*
-     * Google Apps Script 웹 앱 배포 URL을 입력하세요.
+     * 아래 주소는 Google Apps Script의 웹 앱 배포 URL입니다.
      *
-     * 예:
-     * const GOOGLE_SCRIPT_URL =
-     *     "https://docs.google.com/spreadsheets/d/1pf0nPtf73S9bKCsxlBwYzWI3ALgpRyV_RDeKbwCW6cI/edit?gid=0#gid=0";
+     * 사용자가 제공한 Google 스프레드시트 주소는 문서 주소이므로
+     * index.html의 fetch 주소로 직접 사용할 수 없습니다.
+     *
+     * 먼저 해당 스프레드시트에서 Apps Script를 만들고 웹 앱으로 배포한 뒤,
+     * 생성된 /exec 주소를 아래에 입력해야 합니다.
      */
-    const GOOGLE_SCRIPT_URL = "https://docs.google.com/spreadsheets/d/1pf0nPtf73S9bKCsxlBwYzWI3ALgpRyV_RDeKbwCW6cI/edit?gid=0#gid=0";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwBrOwlAYL9DFXKneyXgLkoda7G0LdmoygqJJvFmF5DzJZbQOrmYNdE1EhsH7f4UgczNw/exec";
+
+    const STORAGE_KEY = "coffee_fruit_cheong_orders";
 
     let selectedDrink = "";
     let selectedPrice = 0;
     let quantity = 1;
     let orders = [];
     let pendingOrder = null;
+
+    document.addEventListener("DOMContentLoaded", function() {
+        loadOrders();
+        renderOrders();
+    });
 
     function selectDrink(name, price, element) {
         selectedDrink = name;
@@ -813,9 +810,12 @@
 
         if (
             !GOOGLE_SCRIPT_URL ||
-            GOOGLE_SCRIPT_URL.includes("https://docs.google.com/spreadsheets/d/1pf0nPtf73S9bKCsxlBwYzWI3ALgpRyV_RDeKbwCW6cI/edit?gid=0#gid=0")
+            GOOGLE_SCRIPT_URL.includes("https://script.google.com/macros/s/AKfycbwBrOwlAYL9DFXKneyXgLkoda7G0LdmoygqJJvFmF5DzJZbQOrmYNdE1EhsH7f4UgczNw/exec")
         ) {
-            showError("https://docs.google.com/spreadsheets/d/1pf0nPtf73S9bKCsxlBwYzWI3ALgpRyV_RDeKbwCW6cI/edit?gid=0#gid=0");
+            showError(
+                "Google Apps Script 웹 앱 URL이 설정되지 않았습니다. " +
+                "스프레드시트 주소가 아니라 Apps Script의 /exec 주소를 입력해주세요."
+            );
             closeModal();
             return;
         }
@@ -841,9 +841,9 @@
 
         try {
             /*
-             * Google Apps Script의 doPost로 주문 데이터를 전송합니다.
-             * no-cors 환경에서는 응답 내용을 읽을 수 없으므로,
-             * 요청이 전송된 뒤 성공으로 처리합니다.
+             * Google Apps Script doPost로 주문을 전송합니다.
+             * no-cors에서는 응답 내용을 읽을 수 없으므로,
+             * fetch가 오류 없이 완료되면 전송 성공으로 처리합니다.
              */
             await fetch(GOOGLE_SCRIPT_URL, {
                 method: "POST",
@@ -855,7 +855,9 @@
             });
 
             orders.push(order);
+            saveOrders();
             renderOrders();
+
             closeModal();
 
             showSuccess("주문이 접수되었습니다. 맛있게 드세요! ☕");
@@ -863,7 +865,12 @@
             resetForm();
         } catch (error) {
             console.error(error);
-            showError("주문 저장 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.");
+
+            showError(
+                "주문 저장 중 문제가 발생했습니다. " +
+                "Apps Script 웹 앱 URL과 배포 권한을 확인해주세요."
+            );
+
             closeModal();
         } finally {
             confirmButton.disabled = false;
@@ -886,6 +893,31 @@
         document.querySelectorAll(".drink").forEach(function(card) {
             card.classList.remove("selected");
         });
+    }
+
+    function saveOrders() {
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(orders));
+        } catch (error) {
+            console.error("주문 목록 저장 실패:", error);
+        }
+    }
+
+    function loadOrders() {
+        try {
+            const savedOrders = localStorage.getItem(STORAGE_KEY);
+
+            if (savedOrders) {
+                const parsedOrders = JSON.parse(savedOrders);
+
+                if (Array.isArray(parsedOrders)) {
+                    orders = parsedOrders;
+                }
+            }
+        } catch (error) {
+            console.error("주문 목록 불러오기 실패:", error);
+            orders = [];
+        }
     }
 
     function renderOrders() {
@@ -924,13 +956,13 @@
 
                         <div class="order-drink">
                             ${escapeHtml(order.drink)}
-                            × ${order.quantity}
+                            × ${Number(order.quantity) || 1}
                         </div>
                     </div>
                 </div>
 
                 <div class="order-time">
-                    ${escapeHtml(order.time)}
+                    ${escapeHtml(order.time || "")}
                 </div>
             `;
 
@@ -957,7 +989,7 @@
 
         setTimeout(function() {
             error.style.display = "none";
-        }, 5000);
+        }, 6000);
     }
 
     function hideMessage() {
@@ -968,7 +1000,7 @@
     function escapeHtml(text) {
         const div = document.createElement("div");
 
-        div.textContent = text;
+        div.textContent = String(text ?? "");
 
         return div.innerHTML;
     }
