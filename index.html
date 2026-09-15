@@ -884,11 +884,9 @@
 </div>
 
 <script>
-    /*
-     * Google Apps Script 웹앱 주소
-     */
     const GOOGLE_SCRIPT_URL =
         "https://script.google.com/macros/s/AKfycbwFVio9q1YLP2VYuBLKntbjdtq6_Uoe1cpiNTV0gMyrEN5E5DWJ7tQMAvW2dLxrDxOu/exec";
+
     const STORAGE_KEY = "coffee_fruit_cheong_orders";
     const MAX_ORDER_QUANTITY = 10;
     const REQUEST_TIMEOUT = 10000;
@@ -900,49 +898,116 @@
     let pendingOrder = null;
     let isSending = false;
 
-    /*
-     * 페이지가 열릴 때 실행
-     */
-    document.addEventListener("DOMContentLoaded", function() {
+
+    /* ================================
+       페이지 시작
+    ================================= */
+
+    document.addEventListener("DOMContentLoaded", function () {
+
         loadOrders();
         renderOrders();
         updateQuantityButtons();
-    });
 
-    /*
-     * 메뉴 키보드 접근성 처리
-     */
-    function handleDrinkKeydown(event, name, price, element) {
-        if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            selectDrink(name, price, element);
-        }
-    }
+        /*
+         * 메뉴 선택 이벤트
+         * HTML의 onclick에 의존하지 않고
+         * 여기서 직접 연결합니다.
+         */
+        document.querySelectorAll(".drink").forEach(function (card) {
 
-    /*
-     * 음료 선택
-     */
-    function selectDrink(name, price, element) {
-        if (isSending) return;
+            card.addEventListener("click", function () {
 
-        selectedDrink = name;
-        selectedPrice = price;
+                if (isSending) {
+                    return;
+                }
 
-        document.querySelectorAll(".drink").forEach(function(card) {
-            card.classList.remove("selected");
+                const name = card.getAttribute("data-name");
+                const price = Number(card.getAttribute("data-price"));
+
+                selectDrink(name, price, card);
+            });
+
+            card.addEventListener("keydown", function (event) {
+
+                if (event.key === "Enter" || event.key === " ") {
+
+                    event.preventDefault();
+
+                    if (isSending) {
+                        return;
+                    }
+
+                    const name = card.getAttribute("data-name");
+                    const price = Number(card.getAttribute("data-price"));
+
+                    selectDrink(name, price, card);
+                }
+            });
+
         });
 
-        element.classList.add("selected");
+    });
 
-        document.getElementById("selectedDrink").value =
-            `${name} (${price.toLocaleString("ko-KR")}원)`;
+
+    /* ================================
+       음료 선택
+    ================================= */
+
+    function selectDrink(name, price, element) {
+
+        if (isSending) {
+            return;
+        }
+
+        selectedDrink = String(name);
+        selectedPrice = Number(price);
+
+        /*
+         * 모든 메뉴 선택 해제
+         */
+        document.querySelectorAll(".drink").forEach(function (card) {
+
+            card.classList.remove("selected");
+            card.setAttribute("aria-pressed", "false");
+
+        });
+
+        /*
+         * 현재 선택한 메뉴 표시
+         */
+        if (element) {
+
+            element.classList.add("selected");
+            element.setAttribute("aria-pressed", "true");
+
+        }
+
+        /*
+         * 선택한 음료 입력창 표시
+         */
+        const selectedDrinkInput =
+            document.getElementById("selectedDrink");
+
+        selectedDrinkInput.value =
+            selectedDrink +
+            " (" +
+            selectedPrice.toLocaleString("ko-KR") +
+            "원)";
+
+        hideMessage();
     }
 
-    /*
-     * 수량 변경
-     */
+
+    /* ================================
+       수량 변경
+    ================================= */
+
     function changeQuantity(value) {
-        if (isSending) return;
+
+        if (isSending) {
+            return;
+        }
 
         quantity += value;
 
@@ -955,54 +1020,81 @@
         }
 
         document.getElementById("quantity").value = quantity;
+
         updateQuantityButtons();
     }
 
-    /*
-     * 수량 버튼 상태 변경
-     */
+
     function updateQuantityButtons() {
-        document.getElementById("minusButton").disabled =
+
+        const minusButton =
+            document.getElementById("minusButton");
+
+        const plusButton =
+            document.getElementById("plusButton");
+
+        minusButton.disabled =
             quantity <= 1 || isSending;
 
-        document.getElementById("plusButton").disabled =
+        plusButton.disabled =
             quantity >= MAX_ORDER_QUANTITY || isSending;
     }
 
-    /*
-     * 주문 등록 버튼
-     */
-    function submitOrder() {
-        if (isSending) return;
 
-        const name = document.getElementById("name").value.trim();
+    /* ================================
+       주문 등록
+    ================================= */
+
+    function submitOrder() {
+
+        if (isSending) {
+            return;
+        }
+
+        const name =
+            document.getElementById("name").value.trim();
 
         hideMessage();
 
         if (name === "") {
+
             showError("주문자 이름을 입력해주세요.");
+
             document.getElementById("name").focus();
+
             return;
         }
 
         if (selectedDrink === "") {
+
             showError("음료를 선택해주세요.");
+
             return;
         }
 
         if (!Number.isInteger(quantity) || quantity <= 0) {
+
             showError("주문 수량이 올바르지 않습니다.");
+
             return;
         }
 
         pendingOrder = {
+
             name: name,
+
             drink: selectedDrink,
+
             quantity: quantity,
+
             price: selectedPrice,
+
             total: selectedPrice * quantity,
+
             time: new Date().toLocaleString("ko-KR")
+
         };
+
 
         document.getElementById("confirmName").textContent =
             pendingOrder.name;
@@ -1016,65 +1108,78 @@
         document.getElementById("confirmTotal").textContent =
             pendingOrder.total.toLocaleString("ko-KR") + "원";
 
+
         openModal();
     }
 
-    /*
-     * 주문 확인 모달 열기
-     */
+
+    /* ================================
+       주문 확인 모달
+    ================================= */
+
     function openModal() {
-        const modal = document.getElementById("orderModal");
+
+        const modal =
+            document.getElementById("orderModal");
 
         modal.classList.add("show");
+
         document.body.classList.add("modal-open");
     }
 
-    /*
-     * 주문 확인 모달 닫기
-     */
+
     function closeModal() {
-        const modal = document.getElementById("orderModal");
+
+        const modal =
+            document.getElementById("orderModal");
 
         modal.classList.remove("show");
 
         if (!isAnyModalOpen()) {
+
             document.body.classList.remove("modal-open");
+
         }
     }
 
-    /*
-     * 주문 확인 모달 바깥 영역 클릭 시 닫기
-     */
+
     function closeModalByBackground(event) {
-        if (event.target.id === "orderModal" && !isSending) {
+
+        if (
+            event.target.id === "orderModal" &&
+            !isSending
+        ) {
+
             closeModal();
+
         }
     }
 
-    /*
-     * 주문 확정 및 Google Apps Script 전송
-     *
-     * JSONP 방식으로 Google Apps Script에 주문 데이터를 전송합니다.
-     */
+
+    /* ================================
+       Google Apps Script 전송
+    ================================= */
+
     function confirmOrder() {
+
         if (!pendingOrder || isSending) {
             return;
         }
 
         isSending = true;
+
         setSendingState(true);
 
-        const confirmBtn = document.getElementById("confirmButton");
-        const script = document.createElement("script");
+        const script =
+            document.createElement("script");
 
-        const callbackName = "gasCallback_" + Date.now();
+        const callbackName =
+            "gasCallback_" + Date.now();
 
         let finished = false;
 
-        /*
-         * 전송 완료 후 정리
-         */
         function cleanup() {
+
             if (finished) {
                 return;
             }
@@ -1086,55 +1191,70 @@
             delete window[callbackName];
 
             if (script.parentNode) {
+
                 script.parentNode.removeChild(script);
+
             }
 
             isSending = false;
+
             setSendingState(false);
         }
 
-        /*
-         * 일정 시간 동안 응답이 없으면 통신 오류 처리
-         */
-        const timeout = setTimeout(function() {
-            cleanup();
-            closeModal();
-            showError(
-                "서버 응답이 없습니다. 인터넷 연결을 확인한 후 다시 시도해주세요."
-            );
-        }, REQUEST_TIMEOUT);
+
+        const timeout =
+            setTimeout(function () {
+
+                cleanup();
+
+                closeModal();
+
+                showError(
+                    "서버 응답이 없습니다. 인터넷 연결을 확인한 후 다시 시도해주세요."
+                );
+
+            }, REQUEST_TIMEOUT);
+
 
         /*
-         * Google Apps Script 응답 처리
+         * Google Apps Script 응답
          */
-        window[callbackName] = function(response) {
+        window[callbackName] = function (response) {
+
             cleanup();
 
-            if (response && response.result === "success") {
-                /*
-                 * 주문 성공
-                 */
+            if (
+                response &&
+                response.result === "success"
+            ) {
+
                 orders.push(pendingOrder);
+
                 saveOrders();
+
                 renderOrders();
 
                 closeModal();
+
                 resetForm();
 
-                // 주문 완료 팝업 표시
                 showOrderCompletePopup();
 
-            } else if (response && response.result === "closed") {
-                /*
-                 * 실제 주문 마감
-                 */
+            }
+
+            else if (
+                response &&
+                response.result === "closed"
+            ) {
+
                 closeModal();
+
                 showOrderClosedPopup();
 
-            } else {
-                /*
-                 * 기타 서버 오류
-                 */
+            }
+
+            else {
+
                 closeModal();
 
                 const errorMessage =
@@ -1143,289 +1263,480 @@
                         : "주문 처리 중 오류가 발생했습니다.";
 
                 showError(errorMessage);
+
             }
+
         };
 
+
         /*
-         * 스크립트 통신 자체가 실패한 경우
+         * 통신 오류
          */
-        script.onerror = function() {
+        script.onerror = function () {
+
             cleanup();
+
             closeModal();
 
             showError(
                 "Google Sheets와 통신하지 못했습니다. 잠시 후 다시 시도해주세요."
             );
+
         };
 
-        /*
-         * 전송할 데이터 구성
-         */
-        const params = new URLSearchParams({
-            callback: callbackName,
-            data: JSON.stringify(pendingOrder)
-        });
 
-        script.src = `${GOOGLE_SCRIPT_URL}?${params.toString()}`;
+        /*
+         * 전송 데이터
+         */
+        const params =
+            new URLSearchParams({
+
+                callback: callbackName,
+
+                data: JSON.stringify(pendingOrder)
+
+            });
+
+
+        script.src =
+            GOOGLE_SCRIPT_URL +
+            "?" +
+            params.toString();
+
 
         document.body.appendChild(script);
     }
 
-    /*
-     * 전송 중 화면 상태
-     */
+
+    /* ================================
+       전송 상태
+    ================================= */
+
     function setSendingState(sending) {
-        const orderButton = document.getElementById("orderButton");
-        const confirmButton = document.getElementById("confirmButton");
+
+        const orderButton =
+            document.getElementById("orderButton");
+
+        const confirmButton =
+            document.getElementById("confirmButton");
+
 
         orderButton.disabled = sending;
+
         confirmButton.disabled = sending;
 
+
         if (sending) {
+
             confirmButton.textContent = "전송 중...";
+
         } else {
+
             confirmButton.textContent = "주문 확정";
+
         }
+
 
         updateQuantityButtons();
 
-        document.querySelectorAll(".drink").forEach(function(card) {
-            card.style.pointerEvents = sending ? "none" : "auto";
-            card.style.opacity = sending ? "0.7" : "1";
-        });
+
+        document.querySelectorAll(".drink")
+            .forEach(function (card) {
+
+                card.style.pointerEvents =
+                    sending ? "none" : "auto";
+
+                card.style.opacity =
+                    sending ? "0.7" : "1";
+
+            });
     }
 
-    /*
-     * 주문 마감 팝업 열기
-     */
+
+    /* ================================
+       주문 마감 팝업
+    ================================= */
+
     function showOrderClosedPopup() {
-        const modal = document.getElementById("orderClosedModal");
+
+        const modal =
+            document.getElementById("orderClosedModal");
 
         modal.classList.add("show");
+
         document.body.classList.add("modal-open");
     }
 
-    /*
-     * 주문 마감 팝업 닫기
-     */
+
     function closeOrderClosedPopup() {
-        const modal = document.getElementById("orderClosedModal");
+
+        const modal =
+            document.getElementById("orderClosedModal");
 
         modal.classList.remove("show");
 
         if (!isAnyModalOpen()) {
+
             document.body.classList.remove("modal-open");
+
         }
     }
 
-    /*
-     * 주문 완료 팝업 열기
-     */
+
+    /* ================================
+       주문 완료 팝업
+    ================================= */
+
     function showOrderCompletePopup() {
-        const modal = document.getElementById("orderCompleteModal");
+
+        const modal =
+            document.getElementById("orderCompleteModal");
 
         modal.classList.add("show");
+
         document.body.classList.add("modal-open");
     }
 
-    /*
-     * 주문 완료 팝업 닫기
-     */
+
     function closeOrderCompletePopup() {
-        const modal = document.getElementById("orderCompleteModal");
+
+        const modal =
+            document.getElementById("orderCompleteModal");
 
         modal.classList.remove("show");
 
         if (!isAnyModalOpen()) {
+
             document.body.classList.remove("modal-open");
+
         }
     }
 
-    /*
-     * 현재 열려 있는 모달이 있는지 확인
-     */
+
+    /* ================================
+       모달 확인
+    ================================= */
+
     function isAnyModalOpen() {
+
         return document.querySelector(".modal.show") !== null;
     }
 
-    /*
-     * 주문 폼 초기화
-     */
+
+    /* ================================
+       폼 초기화
+    ================================= */
+
     function resetForm() {
+
         document.getElementById("name").value = "";
+
         document.getElementById("selectedDrink").value = "";
+
         document.getElementById("quantity").value = "1";
 
+
         selectedDrink = "";
+
         selectedPrice = 0;
+
         quantity = 1;
+
         pendingOrder = null;
 
-        document.querySelectorAll(".drink").forEach(function(card) {
-            card.classList.remove("selected");
-        });
+
+        document.querySelectorAll(".drink")
+            .forEach(function (card) {
+
+                card.classList.remove("selected");
+
+                card.setAttribute(
+                    "aria-pressed",
+                    "false"
+                );
+
+            });
+
 
         updateQuantityButtons();
     }
 
-    /*
-     * 주문 내역 저장
-     */
+
+    /* ================================
+       주문 저장
+    ================================= */
+
     function saveOrders() {
+
         try {
+
             localStorage.setItem(
                 STORAGE_KEY,
                 JSON.stringify(orders)
             );
+
         } catch (error) {
-            console.error("주문 내역 저장 오류:", error);
+
+            console.error(
+                "주문 내역 저장 오류:",
+                error
+            );
+
         }
     }
 
-    /*
-     * 주문 내역 불러오기
-     */
+
+    /* ================================
+       주문 불러오기
+    ================================= */
+
     function loadOrders() {
+
         try {
-            const saved = localStorage.getItem(STORAGE_KEY);
+
+            const saved =
+                localStorage.getItem(STORAGE_KEY);
 
             if (!saved) {
+
                 orders = [];
+
                 return;
             }
 
-            const parsedOrders = JSON.parse(saved);
+
+            const parsedOrders =
+                JSON.parse(saved);
+
 
             if (Array.isArray(parsedOrders)) {
+
                 orders = parsedOrders;
+
             } else {
+
                 orders = [];
+
             }
 
         } catch (error) {
-            console.error("주문 내역 불러오기 오류:", error);
+
+            console.error(
+                "주문 내역 불러오기 오류:",
+                error
+            );
+
             orders = [];
         }
     }
 
-    /*
-     * 주문 목록 출력
-     */
+
+    /* ================================
+       주문 목록 출력
+    ================================= */
+
     function renderOrders() {
-        const list = document.getElementById("orderList");
-        const count = document.getElementById("orderCount");
 
-        const totalQuantity = orders.reduce(function(sum, item) {
-            return sum + (Number(item.quantity) || 0);
-        }, 0);
+        const list =
+            document.getElementById("orderList");
 
-        count.textContent = `총 ${totalQuantity}잔 주문`;
+        const count =
+            document.getElementById("orderCount");
+
+
+        const totalQuantity =
+            orders.reduce(function (sum, item) {
+
+                return sum +
+                    (Number(item.quantity) || 0);
+
+            }, 0);
+
+
+        count.textContent =
+            "총 " +
+            totalQuantity +
+            "잔 주문";
+
 
         if (orders.length === 0) {
+
             list.innerHTML =
-                `<div class="empty">아직 등록된 주문이 없습니다.</div>`;
+                '<div class="empty">아직 등록된 주문이 없습니다.</div>';
+
             return;
         }
+
 
         list.innerHTML = "";
 
-        orders.forEach(function(order, index) {
-            const item = document.createElement("div");
+
+        orders.forEach(function (order, index) {
+
+            const item =
+                document.createElement("div");
 
             item.className = "order-item";
 
-            item.innerHTML = `
-                <div class="order-info">
-                    <div class="order-number">${index + 1}</div>
 
-                    <div>
-                        <div class="order-name">
-                            ${escapeHtml(order.name)}
-                        </div>
+            const orderNumber =
+                document.createElement("div");
 
-                        <div class="order-drink">
-                            ${escapeHtml(order.drink)} × ${Number(order.quantity) || 0}
-                        </div>
+            orderNumber.className =
+                "order-number";
 
-                        <div class="order-total">
-                            ${(Number(order.total) || 0).toLocaleString("ko-KR")}원
-                        </div>
-                    </div>
-                </div>
+            orderNumber.textContent =
+                index + 1;
 
-                <div class="order-time">
-                    ${escapeHtml(order.time || "")}
-                </div>
-            `;
+
+            const orderName =
+                document.createElement("div");
+
+            orderName.className =
+                "order-name";
+
+            orderName.textContent =
+                order.name;
+
+
+            const orderDrink =
+                document.createElement("div");
+
+            orderDrink.className =
+                "order-drink";
+
+            orderDrink.textContent =
+                String(order.drink) +
+                " × " +
+                (Number(order.quantity) || 0);
+
+
+            const orderTotal =
+                document.createElement("div");
+
+            orderTotal.className =
+                "order-total";
+
+            orderTotal.textContent =
+                (Number(order.total) || 0)
+                    .toLocaleString("ko-KR") +
+                "원";
+
+
+            const orderText =
+                document.createElement("div");
+
+            orderText.appendChild(orderName);
+
+            orderText.appendChild(orderDrink);
+
+            orderText.appendChild(orderTotal);
+
+
+            const orderInfo =
+                document.createElement("div");
+
+            orderInfo.className =
+                "order-info";
+
+            orderInfo.appendChild(orderNumber);
+
+            orderInfo.appendChild(orderText);
+
+
+            const orderTime =
+                document.createElement("div");
+
+            orderTime.className =
+                "order-time";
+
+            orderTime.textContent =
+                order.time || "";
+
+
+            item.appendChild(orderInfo);
+
+            item.appendChild(orderTime);
 
             list.appendChild(item);
+
         });
     }
 
-    /*
-     * 성공 메시지
-     */
+
+    /* ================================
+       메시지
+    ================================= */
+
     function showSuccess(message) {
-        const element = document.getElementById("success");
+
+        const element =
+            document.getElementById("success");
 
         element.textContent = message;
+
         element.style.display = "block";
 
-        setTimeout(function() {
+
+        setTimeout(function () {
+
             element.style.display = "none";
+
         }, 5000);
     }
 
-    /*
-     * 오류 메시지
-     */
+
     function showError(message) {
-        const element = document.getElementById("error");
+
+        const element =
+            document.getElementById("error");
 
         element.textContent = message;
+
         element.style.display = "block";
 
-        setTimeout(function() {
+
+        setTimeout(function () {
+
             element.style.display = "none";
+
         }, 7000);
     }
 
-    /*
-     * 성공 및 오류 메시지 숨기기
-     */
+
     function hideMessage() {
-        document.getElementById("success").style.display = "none";
-        document.getElementById("error").style.display = "none";
+
+        document.getElementById("success")
+            .style.display = "none";
+
+        document.getElementById("error")
+            .style.display = "none";
     }
 
-    /*
-     * HTML 특수문자 처리
-     */
-    function escapeHtml(text) {
-        const div = document.createElement("div");
 
-        div.textContent = String(text ?? "");
+    /* ================================
+       ESC 키
+    ================================= */
 
-        return div.innerHTML;
-    }
+    document.addEventListener(
+        "keydown",
+        function (event) {
 
-    /*
-     * ESC 키로 모든 모달 닫기
-     */
-    document.addEventListener("keydown", function(event) {
-        if (event.key !== "Escape") {
-            return;
+            if (event.key !== "Escape") {
+                return;
+            }
+
+            if (isSending) {
+                return;
+            }
+
+            closeModal();
+
+            closeOrderClosedPopup();
+
+            closeOrderCompletePopup();
         }
-
-        if (isSending) {
-            return;
-        }
-
-        closeModal();
-        closeOrderClosedPopup();
-        closeOrderCompletePopup();
-    });
+    );
 </script>
-
 </body>
 </html>
