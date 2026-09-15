@@ -108,11 +108,17 @@
             border-radius: 15px;
             cursor: pointer;
             transition: 0.2s;
+            outline: none;
         }
 
         .drink:hover {
             transform: translateY(-2px);
             box-shadow: 0 7px 15px rgba(70, 45, 30, 0.08);
+        }
+
+        .drink:focus-visible {
+            border-color: #b58a65;
+            box-shadow: 0 0 0 3px rgba(181, 138, 101, 0.25);
         }
 
         .drink.selected {
@@ -512,6 +518,7 @@
         </div>
     </header>
 
+
     <!-- 메뉴 -->
     <section class="section">
         <div class="section-title">
@@ -521,167 +528,216 @@
 
         <div class="menu">
 
-    <!-- 딸기에이드 -->
-    <div class="drink"
-         role="button"
-         tabindex="0"
-         onclick="selectDrink('딸기에이드', 2500, this)"
-         onkeydown="handleDrinkKeydown(event, '딸기에이드', 2500, this)">
-        <div class="check">✓</div>
-        <div class="drink-icon">🍓</div>
-        <div class="drink-name">딸기에이드</div>
-        <div class="drink-description">달콤하고 상큼한 딸기 에이드</div>
-        <div class="price">2,500원</div>
-    </div>
+            <!-- 딸기에이드 -->
+            <div
+                class="drink"
+                role="button"
+                tabindex="0"
+                data-name="딸기에이드"
+                data-price="2500"
+                aria-pressed="false"
+            >
+                <div class="check">✓</div>
+                <div class="drink-icon">🍓</div>
+                <div class="drink-name">딸기에이드</div>
+                <div class="drink-description">달콤하고 상큼한 딸기 에이드</div>
+                <div class="price">2,500원</div>
+            </div>
 
-    <!-- 자몽에이드 -->
-    <div class="drink"
-         role="button"
-         tabindex="0"
-         onclick="selectDrink('자몽에이드', 2500, this)"
-         onkeydown="handleDrinkKeydown(event, '자몽에이드', 2500, this)">
-        <div class="check">✓</div>
-        <div class="drink-icon">🍊</div>
-        <div class="drink-name">자몽에이드</div>
-        <div class="drink-description">쌉쌀하고 상큼한 자몽 에이드</div>
-        <div class="price">2,500원</div>
-    </div>
 
-    <!-- 키위에이드 -->
-    <div class="drink"
-         role="button"
-         tabindex="0"
-         onclick="selectDrink('키위에이드', 2500, this)"
-         onkeydown="handleDrinkKeydown(event, '키위에이드', 2500, this)">
-        <div class="check">✓</div>
-        <div class="drink-icon">🥝</div>
-        <div class="drink-name">키위에이드</div>
-        <div class="drink-description">새콤하고 상쾌한 키위 에이드</div>
-        <div class="price">2,500원</div>
-    </div>
+            <!-- 자몽에이드 -->
+            <div
+                class="drink"
+                role="button"
+                tabindex="0"
+                data-name="자몽에이드"
+                data-price="2500"
+                aria-pressed="false"
+            >
+                <div class="check">✓</div>
+                <div class="drink-icon">🍊</div>
+                <div class="drink-name">자몽에이드</div>
+                <div class="drink-description">쌉쌀하고 상큼한 자몽 에이드</div>
+                <div class="price">2,500원</div>
+            </div>
 
-    <!-- 매실에이드 -->
-    <div class="drink"
-         role="button"
-         tabindex="0"
-         onclick="selectDrink('매실에이드', 2000, this)"
-         onkeydown="handleDrinkKeydown(event, '매실에이드', 2000, this)">
-        <div class="check">✓</div>
-        <div class="drink-icon">🍵</div>
-        <div class="drink-name">매실에이드</div>
-        <div class="drink-description">은은한 매실 향의 상큼한 에이드</div>
-        <div class="price">2,000원</div>
-    </div>
 
-    <!-- 아메리카노 HOT -->
-    <div class="drink"
-         role="button"
-         tabindex="0"
-         onclick="selectDrink('아메리카노(HOT)', 1500, this)"
-         onkeydown="handleDrinkKeydown(event, '아메리카노(HOT)', 1500, this)">
-        <div class="check">✓</div>
-        <div class="drink-icon">☕</div>
-        <div class="drink-name">아메리카노(HOT)</div>
-        <div class="drink-description">따뜻하고 깔끔한 아메리카노</div>
-        <div class="price">1,500원</div>
-    </div>
+            <!-- 키위에이드 -->
+            <div
+                class="drink"
+                role="button"
+                tabindex="0"
+                data-name="키위에이드"
+                data-price="2500"
+                aria-pressed="false"
+            >
+                <div class="check">✓</div>
+                <div class="drink-icon">🥝</div>
+                <div class="drink-name">키위에이드</div>
+                <div class="drink-description">새콤하고 상쾌한 키위 에이드</div>
+                <div class="price">2,500원</div>
+            </div>
 
-    <!-- 아메리카노 ICE -->
-    <div class="drink"
-         role="button"
-         tabindex="0"
-         onclick="selectDrink('아메리카노(ICE)', 1500, this)"
-         onkeydown="handleDrinkKeydown(event, '아메리카노(ICE)', 1500, this)">
-        <div class="check">✓</div>
-        <div class="drink-icon">🧊</div>
-        <div class="drink-name">아메리카노(ICE)</div>
-        <div class="drink-description">시원하고 깔끔한 아이스 아메리카노</div>
-        <div class="price">1,500원</div>
-    </div>
 
-    <!-- 라떼 HOT -->
-    <div class="drink"
-         role="button"
-         tabindex="0"
-         onclick="selectDrink('라떼(HOT)', 2500, this)"
-         onkeydown="handleDrinkKeydown(event, '라떼(HOT)', 2500, this)">
-        <div class="check">✓</div>
-        <div class="drink-icon">☕</div>
-        <div class="drink-name">라떼(HOT)</div>
-        <div class="drink-description">부드럽고 따뜻한 우유 라떼</div>
-        <div class="price">2,500원</div>
-    </div>
+            <!-- 매실에이드 -->
+            <div
+                class="drink"
+                role="button"
+                tabindex="0"
+                data-name="매실에이드"
+                data-price="2000"
+                aria-pressed="false"
+            >
+                <div class="check">✓</div>
+                <div class="drink-icon">🍵</div>
+                <div class="drink-name">매실에이드</div>
+                <div class="drink-description">은은한 매실 향의 상큼한 에이드</div>
+                <div class="price">2,000원</div>
+            </div>
 
-    <!-- 라떼 ICE -->
-    <div class="drink"
-         role="button"
-         tabindex="0"
-         onclick="selectDrink('라떼(ICE)', 2500, this)"
-         onkeydown="handleDrinkKeydown(event, '라떼(ICE)', 2500, this)">
-        <div class="check">✓</div>
-        <div class="drink-icon">🧊</div>
-        <div class="drink-name">라떼(ICE)</div>
-        <div class="drink-description">시원하고 부드러운 아이스 라떼</div>
-        <div class="price">2,500원</div>
-    </div>
 
-    <!-- 원두 케냐 -->
-    <div class="drink"
-         role="button"
-         tabindex="0"
-         onclick="selectDrink('원두(케냐, 200g)', 7000, this)"
-         onkeydown="handleDrinkKeydown(event, '원두(케냐, 200g)', 7000, this)">
-        <div class="check">✓</div>
-        <div class="drink-icon">🫘</div>
-        <div class="drink-name">원두(케냐, 200g)</div>
-        <div class="drink-description">케냐 원두 200g</div>
-        <div class="price">7,000원</div>
-    </div>
+            <!-- 아메리카노 HOT -->
+            <div
+                class="drink"
+                role="button"
+                tabindex="0"
+                data-name="아메리카노(HOT)"
+                data-price="1500"
+                aria-pressed="false"
+            >
+                <div class="check">✓</div>
+                <div class="drink-icon">☕</div>
+                <div class="drink-name">아메리카노(HOT)</div>
+                <div class="drink-description">따뜻하고 깔끔한 아메리카노</div>
+                <div class="price">1,500원</div>
+            </div>
 
-    <!-- 원두 에티오피아 -->
-    <div class="drink"
-         role="button"
-         tabindex="0"
-         onclick="selectDrink('원두(에티오피아, 200g)', 8000, this)"
-         onkeydown="handleDrinkKeydown(event, '원두(에티오피아, 200g)', 8000, this)">
-        <div class="check">✓</div>
-        <div class="drink-icon">🫘</div>
-        <div class="drink-name">원두(에티오피아, 200g)</div>
-        <div class="drink-description">에티오피아 원두 200g</div>
-        <div class="price">8,000원</div>
-    </div>
 
-    <!-- 원두 브라질 -->
-    <div class="drink"
-         role="button"
-         tabindex="0"
-         onclick="selectDrink('원두(브라질, 200g)', 5000, this)"
-         onkeydown="handleDrinkKeydown(event, '원두(브라질, 200g)', 5000, this)">
-        <div class="check">✓</div>
-        <div class="drink-icon">🫘</div>
-        <div class="drink-name">원두(브라질, 200g)</div>
-        <div class="drink-description">브라질 원두 200g</div>
-        <div class="price">5,000원</div>
-    </div>
+            <!-- 아메리카노 ICE -->
+            <div
+                class="drink"
+                role="button"
+                tabindex="0"
+                data-name="아메리카노(ICE)"
+                data-price="1500"
+                aria-pressed="false"
+            >
+                <div class="check">✓</div>
+                <div class="drink-icon">🧊</div>
+                <div class="drink-name">아메리카노(ICE)</div>
+                <div class="drink-description">시원하고 깔끔한 아이스 아메리카노</div>
+                <div class="price">1,500원</div>
+            </div>
 
-    <!-- 원두 콜롬비아 -->
-    <div class="drink"
-         role="button"
-         tabindex="0"
-         onclick="selectDrink('원두(콜롬비아, 200g)', 6000, this)"
-         onkeydown="handleDrinkKeydown(event, '원두(콜롬비아, 200g)', 6000, this)">
-        <div class="check">✓</div>
-        <div class="drink-icon">🫘</div>
-        <div class="drink-name">원두(콜롬비아, 200g)</div>
-        <div class="drink-description">콜롬비아 원두 200g</div>
-        <div class="price">6,000원</div>
-    </div>
 
-</div>
+            <!-- 라떼 HOT -->
+            <div
+                class="drink"
+                role="button"
+                tabindex="0"
+                data-name="라떼(HOT)"
+                data-price="2500"
+                aria-pressed="false"
+            >
+                <div class="check">✓</div>
+                <div class="drink-icon">☕</div>
+                <div class="drink-name">라떼(HOT)</div>
+                <div class="drink-description">부드럽고 따뜻한 우유 라떼</div>
+                <div class="price">2,500원</div>
+            </div>
+
+
+            <!-- 라떼 ICE -->
+            <div
+                class="drink"
+                role="button"
+                tabindex="0"
+                data-name="라떼(ICE)"
+                data-price="2500"
+                aria-pressed="false"
+            >
+                <div class="check">✓</div>
+                <div class="drink-icon">🧊</div>
+                <div class="drink-name">라떼(ICE)</div>
+                <div class="drink-description">시원하고 부드러운 아이스 라떼</div>
+                <div class="price">2,500원</div>
+            </div>
+
+
+            <!-- 원두 케냐 -->
+            <div
+                class="drink"
+                role="button"
+                tabindex="0"
+                data-name="원두(케냐, 200g)"
+                data-price="7000"
+                aria-pressed="false"
+            >
+                <div class="check">✓</div>
+                <div class="drink-icon">🫘</div>
+                <div class="drink-name">원두(케냐, 200g)</div>
+                <div class="drink-description">케냐 원두 200g</div>
+                <div class="price">7,000원</div>
+            </div>
+
+
+            <!-- 원두 에티오피아 -->
+            <div
+                class="drink"
+                role="button"
+                tabindex="0"
+                data-name="원두(에티오피아, 200g)"
+                data-price="8000"
+                aria-pressed="false"
+            >
+                <div class="check">✓</div>
+                <div class="drink-icon">🫘</div>
+                <div class="drink-name">원두(에티오피아, 200g)</div>
+                <div class="drink-description">에티오피아 원두 200g</div>
+                <div class="price">8,000원</div>
+            </div>
+
+
+            <!-- 원두 브라질 -->
+            <div
+                class="drink"
+                role="button"
+                tabindex="0"
+                data-name="원두(브라질, 200g)"
+                data-price="5000"
+                aria-pressed="false"
+            >
+                <div class="check">✓</div>
+                <div class="drink-icon">🫘</div>
+                <div class="drink-name">원두(브라질, 200g)</div>
+                <div class="drink-description">브라질 원두 200g</div>
+                <div class="price">5,000원</div>
+            </div>
+
+
+            <!-- 원두 콜롬비아 -->
+            <div
+                class="drink"
+                role="button"
+                tabindex="0"
+                data-name="원두(콜롬비아, 200g)"
+                data-price="6000"
+                aria-pressed="false"
+            >
+                <div class="check">✓</div>
+                <div class="drink-icon">🫘</div>
+                <div class="drink-name">원두(콜롬비아, 200g)</div>
+                <div class="drink-description">콜롬비아 원두 200g</div>
+                <div class="price">6,000원</div>
+            </div>
+
+        </div>
     </section>
+
 
     <!-- 주문 입력 -->
     <section class="section">
+
         <div class="section-title">
             <h2>📝 주문하기</h2>
             <span>주문 정보를 입력해주세요</span>
@@ -690,34 +746,43 @@
         <div id="success" class="success" role="status"></div>
         <div id="error" class="error" role="alert"></div>
 
+
         <div class="form-group">
             <label for="name">주문자 이름(학번)</label>
+
             <input
                 type="text"
                 id="name"
                 placeholder="이름을 입력해주세요"
                 maxlength="30"
-                autocomplete="name">
+                autocomplete="name"
+            >
         </div>
+
 
         <div class="form-group">
             <label for="selectedDrink">선택한 음료</label>
+
             <input
                 type="text"
                 id="selectedDrink"
                 placeholder="위 메뉴에서 음료를 선택해주세요"
-                readonly>
+                readonly
+            >
         </div>
+
 
         <div class="form-group">
             <label>수량</label>
 
             <div class="quantity">
+
                 <button
                     type="button"
                     id="minusButton"
                     onclick="changeQuantity(-1)"
-                    aria-label="수량 줄이기">
+                    aria-label="수량 줄이기"
+                >
                     −
                 </button>
 
@@ -726,29 +791,37 @@
                     id="quantity"
                     value="1"
                     readonly
-                    aria-label="주문 수량">
+                    aria-label="주문 수량"
+                >
 
                 <button
                     type="button"
                     id="plusButton"
                     onclick="changeQuantity(1)"
-                    aria-label="수량 늘리기">
+                    aria-label="수량 늘리기"
+                >
                     +
                 </button>
+
             </div>
         </div>
+
 
         <button
             type="button"
             class="order-button"
             id="orderButton"
-            onclick="submitOrder()">
+            onclick="submitOrder()"
+        >
             주문 등록하기
         </button>
+
     </section>
+
 
     <!-- 현재 브라우저의 주문 내역 -->
     <section class="section">
+
         <div class="section-title">
             <h2>📋 오늘의 주문</h2>
             <span id="orderCount">총 0잔 주문</span>
@@ -757,13 +830,17 @@
         <div class="order-list" id="orderList">
             <div class="empty">아직 등록된 주문이 없습니다.</div>
         </div>
+
     </section>
+
 
     <footer>
         COFFEE & Fruit cheong<br>
         좋은 하루, 좋은 커피 ☕
     </footer>
+
 </div>
+
 
 <!-- 주문 확인 모달 -->
 <div
@@ -772,9 +849,11 @@
     role="dialog"
     aria-modal="true"
     aria-labelledby="modalTitle"
-    onclick="closeModalByBackground(event)">
+    onclick="closeModalByBackground(event)"
+>
 
     <div class="modal-content">
+
         <h2 id="modalTitle" class="modal-title">
             주문 내용을 확인해주세요
         </h2>
@@ -783,7 +862,9 @@
             아래 내용이 맞으면 주문 확정 버튼을 눌러주세요.
         </p>
 
+
         <div class="receipt">
+
             <div class="receipt-row">
                 <span class="receipt-label">주문자</span>
                 <span id="confirmName" class="receipt-value"></span>
@@ -803,13 +884,17 @@
                 <span class="receipt-label">총 금액</span>
                 <span id="confirmTotal" class="receipt-value"></span>
             </div>
+
         </div>
 
+
         <div class="modal-actions">
+
             <button
                 type="button"
                 class="cancel-button"
-                onclick="closeModal()">
+                onclick="closeModal()"
+            >
                 다시 입력
             </button>
 
@@ -817,12 +902,16 @@
                 type="button"
                 class="confirm-button"
                 id="confirmButton"
-                onclick="confirmOrder()">
+                onclick="confirmOrder()"
+            >
                 주문 확정
             </button>
+
         </div>
+
     </div>
 </div>
+
 
 <!-- 주문 마감 팝업 -->
 <div
@@ -830,9 +919,11 @@
     class="modal"
     role="dialog"
     aria-modal="true"
-    aria-labelledby="closedModalTitle">
+    aria-labelledby="closedModalTitle"
+>
 
     <div class="modal-content">
+
         <h2 id="closedModalTitle" class="modal-title">
             주문 마감
         </h2>
@@ -844,15 +935,20 @@
         </p>
 
         <div class="modal-actions">
+
             <button
                 type="button"
                 class="confirm-button"
-                onclick="closeOrderClosedPopup()">
+                onclick="closeOrderClosedPopup()"
+            >
                 확인
             </button>
+
         </div>
+
     </div>
 </div>
+
 
 <!-- 주문 완료 팝업 -->
 <div
@@ -860,9 +956,11 @@
     class="modal"
     role="dialog"
     aria-modal="true"
-    aria-labelledby="completeModalTitle">
+    aria-labelledby="completeModalTitle"
+>
 
     <div class="modal-content">
+
         <h2 id="completeModalTitle" class="modal-title">
             주문 완료
         </h2>
@@ -873,23 +971,37 @@
         </p>
 
         <div class="modal-actions">
+
             <button
                 type="button"
                 class="confirm-button"
-                onclick="closeOrderCompletePopup()">
+                onclick="closeOrderCompletePopup()"
+            >
                 확인
             </button>
+
         </div>
+
     </div>
 </div>
 
+
 <script>
+    /* ================================
+       기본 설정
+    ================================= */
+
     const GOOGLE_SCRIPT_URL =
         "https://script.google.com/macros/s/AKfycbwFVio9q1YLP2VYuBLKntbjdtq6_Uoe1cpiNTV0gMyrEN5E5DWJ7tQMAvW2dLxrDxOu/exec";
 
     const STORAGE_KEY = "coffee_fruit_cheong_orders";
     const MAX_ORDER_QUANTITY = 10;
     const REQUEST_TIMEOUT = 10000;
+
+
+    /* ================================
+       상태 변수
+    ================================= */
 
     let selectedDrink = "";
     let selectedPrice = 0;
@@ -909,10 +1021,9 @@
         renderOrders();
         updateQuantityButtons();
 
+
         /*
-         * 메뉴 선택 이벤트
-         * HTML의 onclick에 의존하지 않고
-         * 여기서 직접 연결합니다.
+         * 메뉴 선택 이벤트 연결
          */
         document.querySelectorAll(".drink").forEach(function (card) {
 
@@ -922,27 +1033,40 @@
                     return;
                 }
 
-                const name = card.getAttribute("data-name");
-                const price = Number(card.getAttribute("data-price"));
+                const name =
+                    card.getAttribute("data-name");
+
+                const price =
+                    Number(card.getAttribute("data-price"));
 
                 selectDrink(name, price, card);
+
             });
+
 
             card.addEventListener("keydown", function (event) {
 
-                if (event.key === "Enter" || event.key === " ") {
-
-                    event.preventDefault();
-
-                    if (isSending) {
-                        return;
-                    }
-
-                    const name = card.getAttribute("data-name");
-                    const price = Number(card.getAttribute("data-price"));
-
-                    selectDrink(name, price, card);
+                if (
+                    event.key !== "Enter" &&
+                    event.key !== " "
+                ) {
+                    return;
                 }
+
+                event.preventDefault();
+
+                if (isSending) {
+                    return;
+                }
+
+                const name =
+                    card.getAttribute("data-name");
+
+                const price =
+                    Number(card.getAttribute("data-price"));
+
+                selectDrink(name, price, card);
+
             });
 
         });
@@ -963,29 +1087,32 @@
         selectedDrink = String(name);
         selectedPrice = Number(price);
 
-        /*
-         * 모든 메뉴 선택 해제
-         */
-        document.querySelectorAll(".drink").forEach(function (card) {
 
-            card.classList.remove("selected");
-            card.setAttribute("aria-pressed", "false");
+        document.querySelectorAll(".drink")
+            .forEach(function (card) {
 
-        });
+                card.classList.remove("selected");
 
-        /*
-         * 현재 선택한 메뉴 표시
-         */
+                card.setAttribute(
+                    "aria-pressed",
+                    "false"
+                );
+
+            });
+
+
         if (element) {
 
             element.classList.add("selected");
-            element.setAttribute("aria-pressed", "true");
+
+            element.setAttribute(
+                "aria-pressed",
+                "true"
+            );
 
         }
 
-        /*
-         * 선택한 음료 입력창 표시
-         */
+
         const selectedDrinkInput =
             document.getElementById("selectedDrink");
 
@@ -994,6 +1121,7 @@
             " (" +
             selectedPrice.toLocaleString("ko-KR") +
             "원)";
+
 
         hideMessage();
     }
@@ -1019,7 +1147,8 @@
             quantity = MAX_ORDER_QUANTITY;
         }
 
-        document.getElementById("quantity").value = quantity;
+        document.getElementById("quantity").value =
+            quantity;
 
         updateQuantityButtons();
     }
@@ -1027,16 +1156,10 @@
 
     function updateQuantityButtons() {
 
-        const minusButton =
-            document.getElementById("minusButton");
-
-        const plusButton =
-            document.getElementById("plusButton");
-
-        minusButton.disabled =
+        document.getElementById("minusButton").disabled =
             quantity <= 1 || isSending;
 
-        plusButton.disabled =
+        document.getElementById("plusButton").disabled =
             quantity >= MAX_ORDER_QUANTITY || isSending;
     }
 
@@ -1056,6 +1179,7 @@
 
         hideMessage();
 
+
         if (name === "") {
 
             showError("주문자 이름을 입력해주세요.");
@@ -1065,6 +1189,7 @@
             return;
         }
 
+
         if (selectedDrink === "") {
 
             showError("음료를 선택해주세요.");
@@ -1072,12 +1197,17 @@
             return;
         }
 
-        if (!Number.isInteger(quantity) || quantity <= 0) {
+
+        if (
+            !Number.isInteger(quantity) ||
+            quantity <= 0
+        ) {
 
             showError("주문 수량이 올바르지 않습니다.");
 
             return;
         }
+
 
         pendingOrder = {
 
@@ -1119,10 +1249,8 @@
 
     function openModal() {
 
-        const modal =
-            document.getElementById("orderModal");
-
-        modal.classList.add("show");
+        document.getElementById("orderModal")
+            .classList.add("show");
 
         document.body.classList.add("modal-open");
     }
@@ -1130,10 +1258,8 @@
 
     function closeModal() {
 
-        const modal =
-            document.getElementById("orderModal");
-
-        modal.classList.remove("show");
+        document.getElementById("orderModal")
+            .classList.remove("show");
 
         if (!isAnyModalOpen()) {
 
@@ -1170,6 +1296,7 @@
 
         setSendingState(true);
 
+
         const script =
             document.createElement("script");
 
@@ -1177,6 +1304,7 @@
             "gasCallback_" + Date.now();
 
         let finished = false;
+
 
         function cleanup() {
 
@@ -1191,9 +1319,7 @@
             delete window[callbackName];
 
             if (script.parentNode) {
-
                 script.parentNode.removeChild(script);
-
             }
 
             isSending = false;
@@ -1216,12 +1342,10 @@
             }, REQUEST_TIMEOUT);
 
 
-        /*
-         * Google Apps Script 응답
-         */
         window[callbackName] = function (response) {
 
             cleanup();
+
 
             if (
                 response &&
@@ -1269,9 +1393,6 @@
         };
 
 
-        /*
-         * 통신 오류
-         */
         script.onerror = function () {
 
             cleanup();
@@ -1285,9 +1406,6 @@
         };
 
 
-        /*
-         * 전송 데이터
-         */
         const params =
             new URLSearchParams({
 
@@ -1359,10 +1477,8 @@
 
     function showOrderClosedPopup() {
 
-        const modal =
-            document.getElementById("orderClosedModal");
-
-        modal.classList.add("show");
+        document.getElementById("orderClosedModal")
+            .classList.add("show");
 
         document.body.classList.add("modal-open");
     }
@@ -1370,10 +1486,8 @@
 
     function closeOrderClosedPopup() {
 
-        const modal =
-            document.getElementById("orderClosedModal");
-
-        modal.classList.remove("show");
+        document.getElementById("orderClosedModal")
+            .classList.remove("show");
 
         if (!isAnyModalOpen()) {
 
@@ -1389,10 +1503,8 @@
 
     function showOrderCompletePopup() {
 
-        const modal =
-            document.getElementById("orderCompleteModal");
-
-        modal.classList.add("show");
+        document.getElementById("orderCompleteModal")
+            .classList.add("show");
 
         document.body.classList.add("modal-open");
     }
@@ -1400,10 +1512,8 @@
 
     function closeOrderCompletePopup() {
 
-        const modal =
-            document.getElementById("orderCompleteModal");
-
-        modal.classList.remove("show");
+        document.getElementById("orderCompleteModal")
+            .classList.remove("show");
 
         if (!isAnyModalOpen()) {
 
@@ -1596,7 +1706,7 @@
                 "order-name";
 
             orderName.textContent =
-                order.name;
+                order.name || "";
 
 
             const orderDrink =
@@ -1606,7 +1716,7 @@
                 "order-drink";
 
             orderDrink.textContent =
-                String(order.drink) +
+                String(order.drink || "") +
                 " × " +
                 (Number(order.quantity) || 0);
 
@@ -1735,8 +1845,10 @@
             closeOrderClosedPopup();
 
             closeOrderCompletePopup();
+
         }
     );
 </script>
+
 </body>
 </html>
